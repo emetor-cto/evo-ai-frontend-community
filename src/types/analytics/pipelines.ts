@@ -130,6 +130,7 @@ export interface Pipeline {
   items?: PipelineItem[]; // Only returned when stages are not included
   conversations_count?: number;
   item_count?: number;
+  total_value?: number;
   services_info?: {
     total_value: number;
     formatted_total?: string;

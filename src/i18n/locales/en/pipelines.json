@@ -634,7 +634,10 @@
       "deleteStage": "Delete Stage",
       "noConversations": "No conversation in this stage",
       "noStages": "No stage found for this pipeline",
-      "totalValue": "{{value}}"
+      "totalValue": "{{value}}",
+      "loadMore": "Load more",
+      "loadingMore": "Loading...",
+      "showingOf": "Showing {{loaded}} of {{total}}"
     },
     "item": {
       "unknownUser": "Unknown User",

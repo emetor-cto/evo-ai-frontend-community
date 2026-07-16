@@ -63,6 +63,15 @@ import DeletePipelineModal from '@/components/pipelines/DeletePipelineModal';
 import ReorderStagesModal from '@/components/pipelines/ReorderStagesModal';
 import { ScheduleActionModal } from '@/components/scheduledActions';
 
+const KANBAN_PAGE_SIZE = 30;
+
+type StagePaginationState = {
+  page: number;
+  hasNext: boolean;
+  loading: boolean;
+  total: number;
+};
+
 export default function PipelineKanban() {
   const { t } = useLanguage('pipelines');
   const { pipelineId } = useParams<{ pipelineId: string }>();
@@ -107,10 +116,17 @@ export default function PipelineKanban() {
   const [loading, setLoading] = useState(true);
   const [pipeline, setPipeline] = useState<Pipeline | null>(null);
   const [stages, setStages] = useState<PipelineStage[]>([]);
+  const [stagePagination, setStagePagination] = useState<Record<string, StagePaginationState>>({});
   const [allPipelines, setAllPipelines] = useState<Pipeline[]>([]);
   const [draggedItem, setDraggedItem] = useState<PipelineItem | null>(null);
   const isDraggingRef = useRef(false);
   const suppressClickUntilRef = useRef(0);
+  // Keep latest stages for filter-change reloads without re-subscribing effects.
+  const stagesRef = useRef<PipelineStage[]>([]);
+  stagesRef.current = stages;
+  // Per-stage request generation — drop stale responses (load-more vs filter refresh).
+  const stageRequestIdRef = useRef<Record<string, number>>({});
+  const pipelineLoadIdRef = useRef(0);
 
   // Modal states
   const [showEditPipelineModal, setShowEditPipelineModal] = useState(false);
@@ -142,24 +158,163 @@ export default function PipelineKanban() {
     selectedConversationForSchedule?.conversation?.contact?.id ??
     selectedConversationForSchedule?.contact?.id;
 
-  // Load pipeline data
+  // Server-side query params for paginated stage loads
+  const itemListParams = useMemo(
+    () => ({
+      search: searchQuery || undefined,
+      assignee_id: assigneeFilter || undefined,
+      conversation_status: statusFilter || undefined,
+      entered_after: dateFrom ? `${dateFrom}T00:00:00` : undefined,
+      entered_before: dateTo ? `${dateTo}T23:59:59` : undefined,
+    }),
+    [searchQuery, assigneeFilter, statusFilter, dateFrom, dateTo],
+  );
+
+  const filtersKey = useMemo(
+    () =>
+      JSON.stringify({
+        search: searchQuery,
+        assignee: assigneeFilter,
+        status: statusFilter,
+        dateFrom,
+        dateTo,
+      }),
+    [searchQuery, assigneeFilter, statusFilter, dateFrom, dateTo],
+  );
+  const filtersKeyRef = useRef(filtersKey);
+
+  const loadStageItems = useCallback(
+    async (stageId: string, page: number, append: boolean) => {
+      if (!pipelineId) return;
+
+      // Replace loads bump the generation so older in-flight responses are dropped.
+      // Append (load more) reuses the current generation — so a slow page-1 cannot
+      // wipe a page-2 that already landed, and a newer replace still cancels appends.
+      let requestId = stageRequestIdRef.current[stageId] || 0;
+      if (!append) {
+        requestId += 1;
+        stageRequestIdRef.current[stageId] = requestId;
+      }
+      const loadIdAtStart = pipelineLoadIdRef.current;
+
+      setStagePagination(prev => ({
+        ...prev,
+        [stageId]: {
+          page: prev[stageId]?.page ?? 1,
+          hasNext: append ? (prev[stageId]?.hasNext ?? false) : false,
+          total: prev[stageId]?.total ?? 0,
+          loading: true,
+        },
+      }));
+
+      try {
+        const response = await pipelinesService.getPipelineItems(pipelineId, {
+          stage_id: stageId,
+          page,
+          per_page: KANBAN_PAGE_SIZE,
+          status: 'active',
+          ...itemListParams,
+        });
+
+        // Stale response (newer request for this stage, or pipeline switched)
+        if (
+          stageRequestIdRef.current[stageId] !== requestId ||
+          pipelineLoadIdRef.current !== loadIdAtStart
+        ) {
+          return;
+        }
+
+        const items = response.data || [];
+        const pagination = response.meta?.pagination;
+        const hasNext = Boolean(pagination?.has_next_page);
+        const total = Number(pagination?.total ?? items.length);
+
+        setStages(prev => {
+          if (!prev.some(stage => stage.id === stageId)) return prev;
+          return prev.map(stage => {
+            if (stage.id !== stageId) return stage;
+            const nextItems = append
+              ? [
+                  ...(stage.items || []).filter(existing => !items.some(i => i.id === existing.id)),
+                  ...items,
+                ]
+              : items;
+            return { ...stage, items: nextItems };
+          });
+        });
+
+        setStagePagination(prev => ({
+          ...prev,
+          [stageId]: { page, hasNext, total, loading: false },
+        }));
+      } catch (error) {
+        if (
+          stageRequestIdRef.current[stageId] !== requestId ||
+          pipelineLoadIdRef.current !== loadIdAtStart
+        ) {
+          return;
+        }
+        console.error('Error loading stage items:', error);
+        setStagePagination(prev => ({
+          ...prev,
+          [stageId]: {
+            page: prev[stageId]?.page ?? 1,
+            hasNext: prev[stageId]?.hasNext ?? false,
+            total: prev[stageId]?.total ?? 0,
+            loading: false,
+          },
+        }));
+      }
+    },
+    [pipelineId, itemListParams],
+  );
+
+  // Load pipeline shell (stages + counts), then first page of each stage
   const loadPipelineData = useCallback(async () => {
     if (!pipelineId) return;
 
+    const loadId = pipelineLoadIdRef.current + 1;
+    pipelineLoadIdRef.current = loadId;
+
     setLoading(true);
+    setStages([]);
+    setStagePagination({});
+    stageRequestIdRef.current = {};
     try {
-      // Load pipeline with all data (stages, items, tasks_info, services_info)
       const pipelineData = await pipelinesService.getPipeline(pipelineId);
+      if (pipelineLoadIdRef.current !== loadId) return;
+
+      const nextStages = (pipelineData.stages || []).map(stage => ({
+        ...stage,
+        items: [] as PipelineItem[],
+      }));
 
       setPipeline(pipelineData);
-      setStages(pipelineData.stages || []);
+      setStages(nextStages);
+      filtersKeyRef.current = filtersKey;
+
+      await Promise.all(nextStages.map(stage => loadStageItems(stage.id, 1, false)));
     } catch (error) {
+      if (pipelineLoadIdRef.current !== loadId) return;
       console.error('Error loading pipeline data:', error);
       toast.error(t('kanban.messages.loadDataError'));
     } finally {
-      setLoading(false);
+      if (pipelineLoadIdRef.current === loadId) {
+        setLoading(false);
+      }
     }
-  }, [pipelineId]);
+  }, [pipelineId, loadStageItems, t, filtersKey]);
+
+  // When filters change after initial load, refresh page 1 of every stage
+  useEffect(() => {
+    if (!pipelineId || stagesRef.current.length === 0) {
+      filtersKeyRef.current = filtersKey;
+      return;
+    }
+    if (filtersKeyRef.current === filtersKey) return;
+    filtersKeyRef.current = filtersKey;
+    void Promise.all(stagesRef.current.map(stage => loadStageItems(stage.id, 1, false)));
+  }, [filtersKey, pipelineId, loadStageItems]);
 
   // Load all pipelines for selector
   const loadAllPipelines = useCallback(async () => {
@@ -175,7 +330,7 @@ export default function PipelineKanban() {
   useEffect(() => {
     loadPipelineData();
     loadAllPipelines();
-  }, [loadPipelineData, loadAllPipelines]);
+  }, [pipelineId]); // eslint-disable-line react-hooks/exhaustive-deps -- reload only on pipeline change; filters handled above
 
   // Handle pipeline change
   const handlePipelineChange = (newPipelineId: string) => {
@@ -208,18 +363,22 @@ export default function PipelineKanban() {
 
     // Capture before async operations
     const movedItem = draggedItem;
+    const fromStageId = movedItem.stage_id;
     const willBeHidden = hasActiveFilters && filterItems([movedItem]).length === 0;
 
     try {
       await pipelinesService.moveItem({
         item_id: movedItem.id,
         pipeline_id: pipelineId!,
-        from_stage_id: movedItem.stage_id,
+        from_stage_id: fromStageId,
         to_stage_id: targetStageId,
       });
 
-      // Reload pipeline data to reflect changes
-      await loadPipelineData();
+      // Refresh only the affected columns (not the whole board payload)
+      await Promise.all([
+        loadStageItems(fromStageId, 1, false),
+        loadStageItems(targetStageId, 1, false),
+      ]);
       toast.success(t('kanban.messages.itemMoved'));
       if (willBeHidden) {
         toast.info(t('kanban.messages.itemHiddenByFilter'), {
@@ -300,44 +459,14 @@ export default function PipelineKanban() {
 
   const filterItems = useCallback(
     (items: PipelineItem[]) => {
-      const q = searchQuery.toLowerCase();
-      // Parse YYYY-MM-DD as local time so the filter matches the operator's
-      // calendar day. `new Date('2026-05-04')` would be interpreted as UTC
-      // midnight, which drops the last 3h of the day for BRT users.
-      const toLocalStartTs = (s: string) => {
-        const [y, m, d] = s.split('-').map(Number);
-        return new Date(y, m - 1, d).getTime() / 1000;
-      };
-      const dateFromTs = dateFrom ? toLocalStartTs(dateFrom) : 0;
-      const dateToTs = dateTo ? toLocalStartTs(dateTo) + 86399 : Infinity;
-
-      return items.filter(item => {
-        const matchesSearch =
-          !q ||
-          item.contact?.name?.toLowerCase().includes(q) ||
-          item.contact?.phone_number?.includes(q) ||
-          item.contact?.email?.toLowerCase().includes(q) ||
-          String(item.conversation?.display_id ?? '').includes(q);
-
-        const matchesAssignee =
-          !assigneeFilter || String(item.conversation?.assignee?.id) === assigneeFilter;
-
-        const matchesStatus =
-          !statusFilter || item.conversation?.status === statusFilter;
-
-        const enteredAt = item.entered_at ?? 0;
-        const matchesDateRange =
-          (!dateFrom || enteredAt >= dateFromTs) &&
-          (!dateTo || enteredAt <= dateToTs);
-
-        const matchesLabel =
-          !labelFilter ||
-          (item.conversation?.labels ?? []).some(l => l.title === labelFilter);
-
-        return matchesSearch && matchesAssignee && matchesStatus && matchesDateRange && matchesLabel;
-      });
+      // Search / assignee / status / date are applied server-side on each page load.
+      // Only label stays client-side (no stage API filter for conversation labels yet).
+      if (!labelFilter) return items;
+      return items.filter(item =>
+        (item.conversation?.labels ?? []).some(l => l.title === labelFilter),
+      );
     },
-    [searchQuery, assigneeFilter, statusFilter, dateFrom, dateTo, labelFilter],
+    [labelFilter],
   );
 
   const hasActiveFilters =
@@ -372,8 +501,13 @@ export default function PipelineKanban() {
   );
 
   const totalItemCount = useMemo(
-    () => stages.reduce((total, stage) => total + (stage.items?.length || 0), 0),
-    [stages],
+    () =>
+      stages.reduce((total, stage) => {
+        const paginatedTotal = stagePagination[stage.id]?.total;
+        if (typeof paginatedTotal === 'number') return total + paginatedTotal;
+        return total + (stage.item_count || stage.items?.length || 0);
+      }, 0),
+    [stages, stagePagination],
   );
 
   // Unique labels collected from all items currently loaded.
@@ -693,10 +827,10 @@ export default function PipelineKanban() {
                   <div className="font-semibold text-foreground">{stages.length}</div>
                   <div className="text-muted-foreground">{t('kanban.header.stages')}</div>
                 </div>
-                {calculatePipelineTotal() > 0 && (
+                {(pipeline?.total_value || calculatePipelineTotal()) > 0 && (
                   <div className="text-center min-w-20">
                     <div className="font-semibold text-green-600 dark:text-green-400 whitespace-nowrap">
-                      R$ {formatCurrency(calculatePipelineTotal())}
+                      R$ {formatCurrency(pipeline?.total_value || calculatePipelineTotal())}
                     </div>
                     <div className="text-muted-foreground">{t('kanban.header.totalValue')}</div>
                   </div>
@@ -1129,8 +1263,16 @@ export default function PipelineKanban() {
                           <h3 className="text-sm font-medium text-foreground">{stage.name}</h3>
                           <span className="bg-muted text-muted-foreground text-xs px-2 py-1 rounded-full">
                             {hasActiveFilters
-                              ? `${(filteredItemsByStage.get(stage.id) || []).length}/${stage.items?.length || stage.item_count || 0}`
-                              : (stage.items?.length || stage.item_count || 0)}
+                              ? `${(filteredItemsByStage.get(stage.id) || []).length}/${
+                                  stagePagination[stage.id]?.total ??
+                                  stage.items?.length ??
+                                  stage.item_count ??
+                                  0
+                                }`
+                              : (stagePagination[stage.id]?.total ??
+                                stage.item_count ??
+                                stage.items?.length ??
+                                0)}
                           </span>
                           {/* Stage Total Value */}
                           {calculateStageTotal(stage.items) > 0 && (
@@ -1516,16 +1658,50 @@ export default function PipelineKanban() {
                         </div>
                       ))}
 
-                      {/* Empty state */}
+                      {/* Empty / loading state */}
                       {(filteredItemsByStage.get(stage.id) || []).length === 0 && (
                         <div className="text-center py-8 text-muted-foreground">
                           <div className="text-sm">
-                            {hasActiveFilters
-                              ? t('kanban.search.noResults')
-                              : t('kanban.stage.noConversations')}
+                            {stagePagination[stage.id]?.loading
+                              ? t('kanban.stage.loadingMore')
+                              : hasActiveFilters
+                                ? t('kanban.search.noResults')
+                                : t('kanban.stage.noConversations')}
                           </div>
                         </div>
                       )}
+
+                      {/* Load more — per-stage pagination */}
+                      {(stagePagination[stage.id]?.hasNext || stagePagination[stage.id]?.loading) &&
+                        (filteredItemsByStage.get(stage.id) || []).length > 0 && (
+                          <div className="pt-1 pb-2 flex flex-col items-center gap-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full"
+                              disabled={stagePagination[stage.id]?.loading}
+                              onClick={() =>
+                                loadStageItems(
+                                  stage.id,
+                                  (stagePagination[stage.id]?.page || 1) + 1,
+                                  true,
+                                )
+                              }
+                            >
+                              {stagePagination[stage.id]?.loading
+                                ? t('kanban.stage.loadingMore')
+                                : t('kanban.stage.loadMore')}
+                            </Button>
+                            {typeof stagePagination[stage.id]?.total === 'number' && (
+                              <span className="text-[11px] text-muted-foreground">
+                                {t('kanban.stage.showingOf', {
+                                  loaded: stage.items?.length || 0,
+                                  total: stagePagination[stage.id].total,
+                                })}
+                              </span>
+                            )}
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>

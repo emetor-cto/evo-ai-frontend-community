@@ -143,10 +143,20 @@ class PipelinesService {
     return extractData<{ success: boolean; message: string }>(response);
   }
 
-  // Get items in a pipeline
+  // Get items in a pipeline (paginated; pass stage_id for per-column Kanban loads)
   async getPipelineItems(
     pipelineId: string,
-    params?: { page?: number; per_page?: number; stage_id?: string },
+    params?: {
+      page?: number;
+      per_page?: number;
+      stage_id?: string;
+      search?: string;
+      assignee_id?: string;
+      conversation_status?: string;
+      entered_after?: string;
+      entered_before?: string;
+      status?: 'active' | 'completed' | 'all';
+    },
   ): Promise<ItemsResponse> {
     const response = await api.get(`/pipelines/${pipelineId}/pipeline_items`, {
       params,
