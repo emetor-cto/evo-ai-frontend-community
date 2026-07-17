@@ -145,6 +145,10 @@
       "agents": "No agent data for the selected period.",
       "channels": "No channel data for the selected period.",
       "pipelineInactive": "Pipeline inactive in the selected period."
+    },
+    "tasks": {
+      "title": "Dashboard tasks",
+      "loading": "Loading tasks..."
     }
   }
 }

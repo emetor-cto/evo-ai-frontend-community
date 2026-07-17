@@ -213,6 +213,13 @@ export const getCustomerMenuItems = (t: (key: string) => string): MenuItem[] => 
         action: 'read',
       },
       {
+        name: t('menu.settings.dashboardChecklists'),
+        href: '/settings/dashboard-checklists',
+        icon: List,
+        resource: 'users',
+        action: 'manage',
+      },
+      {
         name: t('menu.settings.customAttributes'),
         href: '/settings/attributes',
         icon: Code,

@@ -1,0 +1,46 @@
+{
+  "title": "Dashboard checklists",
+  "subtitle": "Create daily routines that appear on agents' dashboards",
+  "empty": "No checklists yet",
+  "emptyDescription": "Create a checklist and assign it to one or more users. They will see the tasks on their dashboard every day.",
+  "create": "New checklist",
+  "edit": "Edit checklist",
+  "delete": "Delete",
+  "save": "Save",
+  "cancel": "Cancel",
+  "form": {
+    "title": "Title",
+    "titlePlaceholder": "e.g. Daily sales routine",
+    "active": "Active",
+    "assignees": "Users",
+    "assigneesHint": "Who will see this checklist on the dashboard",
+    "items": "Checklist items",
+    "itemPlaceholder": "e.g. Check failed calls",
+    "addItem": "Add item",
+    "removeItem": "Remove"
+  },
+  "table": {
+    "title": "Title",
+    "items": "Items",
+    "assignees": "Users",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "actions": "Actions"
+  },
+  "messages": {
+    "loadError": "Could not load checklists",
+    "saveError": "Could not save checklist",
+    "deleteError": "Could not delete checklist",
+    "saved": "Checklist saved",
+    "deleted": "Checklist deleted",
+    "permissionDenied": "You do not have permission to manage checklists",
+    "validationTitle": "Enter a title",
+    "validationItems": "Add at least one item",
+    "validationAssignees": "Select at least one user"
+  },
+  "confirmDelete": {
+    "title": "Delete checklist?",
+    "description": "Users will no longer see this list on the dashboard."
+  }
+}

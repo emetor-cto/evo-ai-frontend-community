@@ -151,6 +151,10 @@
       "agents": "Sem dados de atendentes para o período selecionado.",
       "channels": "Sem dados de canal no período selecionado.",
       "pipelineInactive": "Funil inativo no período selecionado."
+    },
+    "tasks": {
+      "title": "Tarefas do dashboard",
+      "loading": "Carregando tarefas..."
     }
   }
 }

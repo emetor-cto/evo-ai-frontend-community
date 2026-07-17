@@ -51,6 +51,7 @@ import ptBRApi from './locales/pt-BR/api.json';
 import ptBRInstagram from './locales/pt-BR/instagram.json';
 import ptBRMessenger from './locales/pt-BR/messenger.json';
 import ptBRCustomerDashboard from './locales/pt-BR/customerDashboard.json';
+import ptBRDashboardChecklists from './locales/pt-BR/dashboardChecklists.json';
 import ptBRAdminSettings from './locales/pt-BR/adminSettings.json';
 import ptBRRoles from './locales/pt-BR/roles.json';
 import ptBRTutorials from './locales/pt-BR/tutorials.json';
@@ -104,6 +105,7 @@ import ptApi from './locales/pt/api.json';
 import ptInstagram from './locales/pt/instagram.json';
 import ptMessenger from './locales/pt/messenger.json';
 import ptCustomerDashboard from './locales/pt/customerDashboard.json';
+import ptDashboardChecklists from './locales/pt/dashboardChecklists.json';
 import ptAdminSettings from './locales/pt/adminSettings.json';
 import ptRoles from './locales/pt/roles.json';
 import ptTutorials from './locales/pt/tutorials.json';
@@ -157,6 +159,7 @@ import enApi from './locales/en/api.json';
 import enInstagram from './locales/en/instagram.json';
 import enMessenger from './locales/en/messenger.json';
 import enCustomerDashboard from './locales/en/customerDashboard.json';
+import enDashboardChecklists from './locales/en/dashboardChecklists.json';
 import enAdminSettings from './locales/en/adminSettings.json';
 import enRoles from './locales/en/roles.json';
 import enTutorials from './locales/en/tutorials.json';
@@ -210,6 +213,7 @@ import esApi from './locales/es/api.json';
 import esInstagram from './locales/es/instagram.json';
 import esMessenger from './locales/es/messenger.json';
 import esCustomerDashboard from './locales/es/customerDashboard.json';
+import esDashboardChecklists from './locales/es/dashboardChecklists.json';
 import esAdminSettings from './locales/es/adminSettings.json';
 import esRoles from './locales/es/roles.json';
 import esTutorials from './locales/es/tutorials.json';
@@ -263,6 +267,7 @@ import frApi from './locales/fr/api.json';
 import frInstagram from './locales/fr/instagram.json';
 import frMessenger from './locales/fr/messenger.json';
 import frCustomerDashboard from './locales/fr/customerDashboard.json';
+import frDashboardChecklists from './locales/fr/dashboardChecklists.json';
 import frAdminSettings from './locales/fr/adminSettings.json';
 import frRoles from './locales/fr/roles.json';
 import frTutorials from './locales/fr/tutorials.json';
@@ -316,6 +321,7 @@ import itApi from './locales/it/api.json';
 import itInstagram from './locales/it/instagram.json';
 import itMessenger from './locales/it/messenger.json';
 import itCustomerDashboard from './locales/it/customerDashboard.json';
+import itDashboardChecklists from './locales/it/dashboardChecklists.json';
 import itAdminSettings from './locales/it/adminSettings.json';
 import itRoles from './locales/it/roles.json';
 import ptBRTours from './locales/pt-BR/tours.json';
@@ -437,6 +443,7 @@ const resources = {
     instagram: ptBRInstagram,
     messenger: ptBRMessenger,
     customerDashboard: ptBRCustomerDashboard,
+    dashboardChecklists: ptBRDashboardChecklists,
     adminSettings: ptBRAdminSettings,
     roles: ptBRRoles,
     tours: ptBRTours,
@@ -497,6 +504,7 @@ const resources = {
     instagram: ptInstagram,
     messenger: ptMessenger,
     customerDashboard: ptCustomerDashboard,
+    dashboardChecklists: ptDashboardChecklists,
     adminSettings: ptAdminSettings,
     roles: ptRoles,
     tours: ptTours,
@@ -557,6 +565,7 @@ const resources = {
     instagram: enInstagram,
     messenger: enMessenger,
     customerDashboard: enCustomerDashboard,
+    dashboardChecklists: enDashboardChecklists,
     adminSettings: enAdminSettings,
     roles: enRoles,
     tours: enTours,
@@ -617,6 +626,7 @@ const resources = {
     instagram: esInstagram,
     messenger: esMessenger,
     customerDashboard: esCustomerDashboard,
+    dashboardChecklists: esDashboardChecklists,
     adminSettings: esAdminSettings,
     roles: esRoles,
     tours: esTours,
@@ -677,6 +687,7 @@ const resources = {
     instagram: frInstagram,
     messenger: frMessenger,
     customerDashboard: frCustomerDashboard,
+    dashboardChecklists: frDashboardChecklists,
     adminSettings: frAdminSettings,
     roles: frRoles,
     tours: frTours,
@@ -737,6 +748,7 @@ const resources = {
     instagram: itInstagram,
     messenger: itMessenger,
     customerDashboard: itCustomerDashboard,
+    dashboardChecklists: itDashboardChecklists,
     adminSettings: itAdminSettings,
     roles: itRoles,
     tours: itTours,

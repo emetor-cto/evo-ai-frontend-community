@@ -52,6 +52,7 @@ import Teams from '@/pages/Customer/Settings/Teams/Teams';
 import { AddUsers } from '@/pages/Customer/Settings/Teams';
 import Users from '@/pages/Customer/Settings/Users';
 import Labels from '@/pages/Customer/Settings/Labels';
+import DashboardChecklistsSettings from '@/pages/Customer/Settings/DashboardChecklists';
 import CustomAttributes from '@/pages/Customer/Settings/CustomAttributes';
 import Segments from '@/pages/Customer/Settings/Segments/Segments';
 import SegmentCreateEdit from '@/pages/Customer/Settings/Segments/SegmentCreateEdit';
@@ -725,6 +726,21 @@ const AppRouter = () => {
                   <MainLayout>
                     <PermissionRoute resource="labels" action="read">
                       <Labels />
+                    </PermissionRoute>
+                  </MainLayout>
+                </CustomerRoute>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/settings/dashboard-checklists"
+            element={
+              <PrivateRoute>
+                <CustomerRoute>
+                  <MainLayout>
+                    <PermissionRoute resource="users" action="manage">
+                      <DashboardChecklistsSettings />
                     </PermissionRoute>
                   </MainLayout>
                 </CustomerRoute>

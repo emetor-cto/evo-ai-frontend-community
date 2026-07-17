@@ -14,6 +14,7 @@ import DashboardFiltersDialog from './components/DashboardFiltersDialog';
 import DashboardMetricsSection from './components/DashboardMetricsSection';
 import DashboardTrendsSection from './components/DashboardTrendsSection';
 import DashboardPerformanceSection from './components/DashboardPerformanceSection';
+import DashboardTasksCard from './components/DashboardTasksCard';
 import type { DashboardFilterState, DashboardOption } from './components/types';
 import { DashboardTour } from '@/tours';
 
@@ -251,12 +252,18 @@ const CustomerDashboardPage = () => {
   }, [data]);
 
   if (loading) {
-    return <div className="p-4">{t('dashboard.loading') || 'Carregando dashboard...'}</div>;
+    return (
+      <div className="h-full flex flex-col p-4 gap-6">
+        <DashboardTasksCard />
+        <div>{t('dashboard.loading') || 'Carregando dashboard...'}</div>
+      </div>
+    );
   }
 
   if (error || !data) {
     return (
-      <div className="p-4">
+      <div className="h-full flex flex-col p-4 gap-6">
+        <DashboardTasksCard />
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-red-600 font-medium">
@@ -283,11 +290,13 @@ const CustomerDashboardPage = () => {
         />
       </div>
 
-      <div className="-mt-3 flex justify-end" data-tour="dashboard-period-badge">
+      <div data-tour="dashboard-period-badge">
         <Badge variant="secondary">
           {currentPeriodLabel} ({data.period.days} dias)
         </Badge>
       </div>
+
+      <DashboardTasksCard />
 
       <div data-tour="dashboard-metrics">
         <DashboardMetricsSection data={data} t={t} />

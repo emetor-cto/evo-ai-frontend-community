@@ -1,0 +1,46 @@
+{
+  "title": "Checklists do dashboard",
+  "subtitle": "Crie rotinas diárias que aparecem no dashboard dos atendentes",
+  "empty": "Nenhum checklist criado ainda",
+  "emptyDescription": "Crie um checklist e atribua a um ou mais usuários. Eles verão as tarefas no dashboard todos os dias.",
+  "create": "Novo checklist",
+  "edit": "Editar checklist",
+  "delete": "Excluir",
+  "save": "Salvar",
+  "cancel": "Cancelar",
+  "form": {
+    "title": "Título",
+    "titlePlaceholder": "Ex.: Rotina diária comercial",
+    "active": "Ativo",
+    "assignees": "Usuários",
+    "assigneesHint": "Quem verá este checklist no dashboard",
+    "items": "Itens do checklist",
+    "itemPlaceholder": "Ex.: Checar chamadas com falha",
+    "addItem": "Adicionar item",
+    "removeItem": "Remover"
+  },
+  "table": {
+    "title": "Título",
+    "items": "Itens",
+    "assignees": "Usuários",
+    "status": "Status",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "actions": "Ações"
+  },
+  "messages": {
+    "loadError": "Não foi possível carregar os checklists",
+    "saveError": "Não foi possível salvar o checklist",
+    "deleteError": "Não foi possível excluir o checklist",
+    "saved": "Checklist salvo",
+    "deleted": "Checklist excluído",
+    "permissionDenied": "Você não tem permissão para gerenciar checklists",
+    "validationTitle": "Informe um título",
+    "validationItems": "Adicione pelo menos um item",
+    "validationAssignees": "Selecione pelo menos um usuário"
+  },
+  "confirmDelete": {
+    "title": "Excluir checklist?",
+    "description": "Os usuários deixarão de ver esta lista no dashboard."
+  }
+}
