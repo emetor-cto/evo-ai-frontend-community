@@ -120,8 +120,6 @@ export const getCustomerMenuItems = (t: (key: string) => string): MenuItem[] => 
     name: t('menu.customer.notebook'),
     href: '/notebook',
     icon: BookOpen,
-    resource: 'team_notes',
-    action: 'read',
   },
   {
     name: t('menu.customer.automation'),

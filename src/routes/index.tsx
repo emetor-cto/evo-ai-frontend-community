@@ -815,9 +815,7 @@ const AppRouter = () => {
               <PrivateRoute>
                 <CustomerRoute>
                   <MainLayout>
-                    <PermissionRoute resource="team_notes" action="read">
-                      <NotebookPage />
-                    </PermissionRoute>
+                    <NotebookPage />
                   </MainLayout>
                 </CustomerRoute>
               </PrivateRoute>
@@ -830,9 +828,7 @@ const AppRouter = () => {
               <PrivateRoute>
                 <CustomerRoute>
                   <MainLayout>
-                    <PermissionRoute resource="team_notes" action="read">
-                      <NotebookDocumentPage />
-                    </PermissionRoute>
+                    <NotebookDocumentPage />
                   </MainLayout>
                 </CustomerRoute>
               </PrivateRoute>
