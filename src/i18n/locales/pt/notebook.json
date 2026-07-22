@@ -1,0 +1,46 @@
+{
+  "title": "Caderno",
+  "subtitle": "Notas e documentos compartilhados da equipe",
+  "searchPlaceholder": "Buscar documentos...",
+  "folders": {
+    "title": "Pastas",
+    "root": "Todos os documentos",
+    "new": "Nova pasta",
+    "rename": "Renomear pasta",
+    "delete": "Excluir pasta",
+    "namePlaceholder": "Nome da pasta",
+    "empty": "Nenhuma pasta ainda",
+    "deleteConfirm": "Excluir esta pasta? Os documentos vão para a raiz."
+  },
+  "documents": {
+    "new": "Novo documento",
+    "empty": "Nenhum documento nesta pasta",
+    "untitled": "Sem título",
+    "delete": "Excluir documento",
+    "deleteConfirm": "Excluir este documento permanentemente?",
+    "open": "Abrir",
+    "updated": "Atualizado {{date}}"
+  },
+  "editor": {
+    "back": "Voltar ao caderno",
+    "saving": "Salvando...",
+    "saved": "Salvo",
+    "saveFailed": "Não foi possível salvar",
+    "titlePlaceholder": "Sem título",
+    "loading": "Carregando documento..."
+  },
+  "actions": {
+    "cancel": "Cancelar",
+    "create": "Criar",
+    "save": "Salvar",
+    "delete": "Excluir"
+  },
+  "toasts": {
+    "folderCreated": "Pasta criada",
+    "folderUpdated": "Pasta atualizada",
+    "folderDeleted": "Pasta excluída",
+    "documentCreated": "Documento criado",
+    "documentDeleted": "Documento excluído",
+    "uploadFailed": "Falha no upload"
+  }
+}

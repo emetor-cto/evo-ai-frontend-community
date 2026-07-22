@@ -28,6 +28,7 @@ import {
   Route,
   ShieldCheck,
   FileText,
+  BookOpen,
 } from 'lucide-react';
 
 export interface MenuItem {
@@ -113,6 +114,13 @@ export const getCustomerMenuItems = (t: (key: string) => string): MenuItem[] => 
     href: '/products',
     icon: Package,
     resource: 'products',
+    action: 'read',
+  },
+  {
+    name: t('menu.customer.notebook'),
+    href: '/notebook',
+    icon: BookOpen,
+    resource: 'team_notes',
     action: 'read',
   },
   {

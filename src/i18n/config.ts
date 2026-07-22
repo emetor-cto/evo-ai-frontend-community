@@ -26,6 +26,7 @@ import ptBRAccountSettings from './locales/pt-BR/accountSettings.json';
 import ptBRCannedResponses from './locales/pt-BR/cannedResponses.json';
 import ptBRMessageTemplates from './locales/pt-BR/messageTemplates.json';
 import ptBRProducts from './locales/pt-BR/products.json';
+import ptBRNotebook from './locales/pt-BR/notebook.json';
 import ptBRCrmForms from './locales/pt-BR/crmForms.json';
 import ptBRChatPages from './locales/pt-BR/chatPages.json';
 import ptBRTemplates from './locales/pt-BR/templates.json';
@@ -80,6 +81,7 @@ import ptAccountSettings from './locales/pt/accountSettings.json';
 import ptCannedResponses from './locales/pt/cannedResponses.json';
 import ptMessageTemplates from './locales/pt/messageTemplates.json';
 import ptProducts from './locales/pt/products.json';
+import ptNotebook from './locales/pt/notebook.json';
 import ptCrmForms from './locales/pt/crmForms.json';
 import ptChatPages from './locales/pt/chatPages.json';
 import ptTemplates from './locales/pt/templates.json';
@@ -134,6 +136,7 @@ import enAccountSettings from './locales/en/accountSettings.json';
 import enCannedResponses from './locales/en/cannedResponses.json';
 import enMessageTemplates from './locales/en/messageTemplates.json';
 import enProducts from './locales/en/products.json';
+import enNotebook from './locales/en/notebook.json';
 import enCrmForms from './locales/en/crmForms.json';
 import enChatPages from './locales/en/chatPages.json';
 import enTemplates from './locales/en/templates.json';
@@ -188,6 +191,7 @@ import esAccountSettings from './locales/es/accountSettings.json';
 import esCannedResponses from './locales/es/cannedResponses.json';
 import esMessageTemplates from './locales/es/messageTemplates.json';
 import esProducts from './locales/es/products.json';
+import esNotebook from './locales/es/notebook.json';
 import esCrmForms from './locales/es/crmForms.json';
 import esChatPages from './locales/es/chatPages.json';
 import esTemplates from './locales/es/templates.json';
@@ -242,6 +246,7 @@ import frAccountSettings from './locales/fr/accountSettings.json';
 import frCannedResponses from './locales/fr/cannedResponses.json';
 import frMessageTemplates from './locales/fr/messageTemplates.json';
 import frProducts from './locales/fr/products.json';
+import frNotebook from './locales/fr/notebook.json';
 import frCrmForms from './locales/fr/crmForms.json';
 import frChatPages from './locales/fr/chatPages.json';
 import frTemplates from './locales/fr/templates.json';
@@ -296,6 +301,7 @@ import itAccountSettings from './locales/it/accountSettings.json';
 import itCannedResponses from './locales/it/cannedResponses.json';
 import itMessageTemplates from './locales/it/messageTemplates.json';
 import itProducts from './locales/it/products.json';
+import itNotebook from './locales/it/notebook.json';
 import itCrmForms from './locales/it/crmForms.json';
 import itChatPages from './locales/it/chatPages.json';
 import itTemplates from './locales/it/templates.json';
@@ -418,6 +424,7 @@ const resources = {
     cannedResponses: ptBRCannedResponses,
     messageTemplates: ptBRMessageTemplates,
     products: ptBRProducts,
+    notebook: ptBRNotebook,
     crmForms: ptBRCrmForms,
     chatPages: ptBRChatPages,
     templates: ptBRTemplates,
@@ -479,6 +486,7 @@ const resources = {
     cannedResponses: ptCannedResponses,
     messageTemplates: ptMessageTemplates,
     products: ptProducts,
+    notebook: ptNotebook,
     crmForms: ptCrmForms,
     chatPages: ptChatPages,
     templates: ptTemplates,
@@ -540,6 +548,7 @@ const resources = {
     cannedResponses: enCannedResponses,
     messageTemplates: enMessageTemplates,
     products: enProducts,
+    notebook: enNotebook,
     crmForms: enCrmForms,
     chatPages: enChatPages,
     templates: enTemplates,
@@ -601,6 +610,7 @@ const resources = {
     cannedResponses: esCannedResponses,
     messageTemplates: esMessageTemplates,
     products: esProducts,
+    notebook: esNotebook,
     crmForms: esCrmForms,
     chatPages: esChatPages,
     templates: esTemplates,
@@ -662,6 +672,7 @@ const resources = {
     cannedResponses: frCannedResponses,
     messageTemplates: frMessageTemplates,
     products: frProducts,
+    notebook: frNotebook,
     crmForms: frCrmForms,
     chatPages: frChatPages,
     templates: frTemplates,
@@ -723,6 +734,7 @@ const resources = {
     cannedResponses: itCannedResponses,
     messageTemplates: itMessageTemplates,
     products: itProducts,
+    notebook: itNotebook,
     crmForms: itCrmForms,
     chatPages: itChatPages,
     templates: itTemplates,

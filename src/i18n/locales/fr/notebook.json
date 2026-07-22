@@ -1,0 +1,46 @@
+{
+  "title": "Notebook",
+  "subtitle": "Shared notes and documents for your team",
+  "searchPlaceholder": "Search documents...",
+  "folders": {
+    "title": "Folders",
+    "root": "All documents",
+    "new": "New folder",
+    "rename": "Rename folder",
+    "delete": "Delete folder",
+    "namePlaceholder": "Folder name",
+    "empty": "No folders yet",
+    "deleteConfirm": "Delete this folder? Documents will move to the root."
+  },
+  "documents": {
+    "new": "New document",
+    "empty": "No documents in this folder",
+    "untitled": "Untitled",
+    "delete": "Delete document",
+    "deleteConfirm": "Delete this document permanently?",
+    "open": "Open",
+    "updated": "Updated {{date}}"
+  },
+  "editor": {
+    "back": "Back to notebook",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "saveFailed": "Could not save",
+    "titlePlaceholder": "Untitled",
+    "loading": "Loading document..."
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "create": "Create",
+    "save": "Save",
+    "delete": "Delete"
+  },
+  "toasts": {
+    "folderCreated": "Folder created",
+    "folderUpdated": "Folder updated",
+    "folderDeleted": "Folder deleted",
+    "documentCreated": "Document created",
+    "documentDeleted": "Document deleted",
+    "uploadFailed": "Upload failed"
+  }
+}

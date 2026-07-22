@@ -64,6 +64,7 @@ import CannedResponses from '@/pages/Customer/Settings/CannedResponses';
 import MessageTemplates from '@/pages/Customer/Settings/MessageTemplates';
 import { Macros } from '@/pages/Customer/Settings/Macros';
 import Products, { ProductsImport } from '@/pages/Customer/Settings/Products';
+import { NotebookPage, NotebookDocumentPage } from '@/pages/Customer/Notebook';
 import CrmForms from '@/pages/Customer/Settings/CrmForms';
 import ChatPages from '@/pages/Customer/Settings/ChatPages';
 import Templates from '@/pages/Customer/Settings/Templates/Templates';
@@ -801,6 +802,36 @@ const AppRouter = () => {
                   <MainLayout>
                     <PermissionRoute resource="products" action="read">
                       <Products />
+                    </PermissionRoute>
+                  </MainLayout>
+                </CustomerRoute>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/notebook"
+            element={
+              <PrivateRoute>
+                <CustomerRoute>
+                  <MainLayout>
+                    <PermissionRoute resource="team_notes" action="read">
+                      <NotebookPage />
+                    </PermissionRoute>
+                  </MainLayout>
+                </CustomerRoute>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/notebook/:id"
+            element={
+              <PrivateRoute>
+                <CustomerRoute>
+                  <MainLayout>
+                    <PermissionRoute resource="team_notes" action="read">
+                      <NotebookDocumentPage />
                     </PermissionRoute>
                   </MainLayout>
                 </CustomerRoute>
