@@ -76,6 +76,7 @@ export default function StartConversationModal({
   open,
   onOpenChange,
   contact,
+  onConversationCreated,
 }: StartConversationModalProps) {
   const { t } = useLanguage('contacts');
   const [selectedInboxId, setSelectedInboxId] = useState<string>('');
@@ -306,12 +307,12 @@ export default function StartConversationModal({
 
       const data = await conversationAPI.create(conversationData);
 
-      // Close modal and redirect to conversation
+      // Close modal and open conversation in a new tab so the contacts
+      // list (filters/scroll position) stays intact in the current tab.
       if (data && data.id) {
         onOpenChange(false);
-
-        // Redirect to conversation like the Vue frontend does
-        window.location.href = `/conversations/${data.id}`;
+        onConversationCreated?.(String(data.id));
+        window.open(`/conversations/${data.id}`, '_blank', 'noopener,noreferrer');
 
         // Reset form
         setMessage('');
