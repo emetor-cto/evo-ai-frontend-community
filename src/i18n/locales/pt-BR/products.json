@@ -64,7 +64,9 @@
     "labelsHint": "Categorias ajudam a filtrar produtos e podem ser usadas por regras de automação.",
     "skuPlaceholder": "SKU-001",
     "purchaseUrlPlaceholder": "https://...",
-    "digitalNoStockHint": "Produtos digitais não têm estoque."
+    "digitalNoStockHint": "Produtos digitais não têm estoque.",
+    "commission": "Comissão",
+    "commissionHint": "Valor da comissão associado a este produto (BRL)."
   },
   "media": {
     "uploadHint": "Arraste imagens ou clique no botão abaixo.",

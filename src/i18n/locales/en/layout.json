@@ -114,6 +114,7 @@
       "cannedResponses": "Canned Responses",
       "messageTemplates": "Message Templates",
       "macros": "Macros",
+      "pipelineTaskTemplates": "Task templates",
       "templates": "Templates",
       "integrations": "Integrations",
       "accessTokens": "Access Tokens",

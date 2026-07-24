@@ -114,6 +114,7 @@
       "cannedResponses": "Risposte Predefinite",
       "messageTemplates": "Modelli di Messaggio",
       "macros": "Macro",
+      "pipelineTaskTemplates": "Modelli di attività",
       "templates": "Modelli",
       "integrations": "Integrazioni",
       "accessTokens": "Tokens di Accesso",

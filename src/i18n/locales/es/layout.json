@@ -114,6 +114,7 @@
       "cannedResponses": "Respuestas Rápidas",
       "messageTemplates": "Plantillas de Mensaje",
       "macros": "Macros",
+      "pipelineTaskTemplates": "Plantillas de tareas",
       "templates": "Plantillas",
       "integrations": "Integraciones",
       "accessTokens": "Tokens de Acceso",

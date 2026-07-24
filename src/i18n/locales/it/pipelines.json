@@ -634,6 +634,27 @@
       "overdue": "in ritardo"
     }
   },
+  "taskTemplates": {
+    "title": "Modelli di attività",
+    "subtitle": "Crea modelli riutilizzabili e selezionali quando aggiungi attività alle card della pipeline.",
+    "new": "Nuovo modello",
+    "edit": "Modifica modello",
+    "empty": "Nessun modello ancora.",
+    "loading": "Caricamento modelli...",
+    "inactive": "Inattivo",
+    "dueInDays": "Scade tra {{days}} giorno/i",
+    "dueInDaysLabel": "Scadenza predefinita (giorni da oggi)",
+    "dueInDaysPlaceholder": "Es: 3",
+    "selectLabel": "Usa modello",
+    "selectPlaceholder": "Seleziona un modello (opzionale)",
+    "created": "Modello creato",
+    "updated": "Modello aggiornato",
+    "deleted": "Modello eliminato",
+    "loadError": "Errore nel caricamento dei modelli",
+    "saveError": "Errore nel salvataggio del modello",
+    "deleteConfirm": "Eliminare questo modello di attività?",
+    "active": "Attivo"
+  },
   "tasks": {
     "title": "Attività",
     "newTask": "Nuova Attività",

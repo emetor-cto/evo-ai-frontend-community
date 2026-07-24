@@ -33,7 +33,10 @@ import type {
 
 // default_price is nullable in the form so an empty input stays empty (not 0),
 // letting validation require an explicit price. It is coerced on submit.
-type ProductFormState = Omit<ProductFormData, 'default_price'> & { default_price: number | null };
+type ProductFormState = Omit<ProductFormData, 'default_price' | 'commission'> & {
+  default_price: number | null;
+  commission: number | null;
+};
 
 interface Props {
   open: boolean;
@@ -64,6 +67,7 @@ function emptyForm(): ProductFormState {
     description: '',
     sku: '',
     default_price: null,
+    commission: null,
     currency: 'BRL',
     purchase_url: '',
     status: 'active',
@@ -106,6 +110,7 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
         description: product.description ?? '',
         sku: product.sku ?? '',
         default_price: product.default_price,
+        commission: product.commission ?? 0,
         currency: product.currency,
         purchase_url: product.purchase_url ?? '',
         status: product.status,
@@ -176,6 +181,7 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
     const payload: ProductFormData = {
       ...form,
       default_price: form.default_price ?? 0,
+      commission: form.commission ?? 0,
       stock_quantity: isPhysical ? form.stock_quantity : null,
       labels,
       variants_attributes: variants.map((v, idx) => ({
@@ -364,6 +370,22 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   placeholder={t('fields.descriptionPlaceholder')}
                 />
+              </div>
+
+              <div className="col-span-2 space-y-1.5">
+                <Label htmlFor="p-commission">{t('fields.commission')}</Label>
+                <Input
+                  id="p-commission"
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  value={form.commission ?? ''}
+                  placeholder="0,00"
+                  onChange={(e) =>
+                    setForm({ ...form, commission: toNumberOrNull(e.target.value) })
+                  }
+                />
+                <p className="text-xs text-muted-foreground">{t('fields.commissionHint')}</p>
               </div>
             </div>
           </TabsContent>

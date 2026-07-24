@@ -20,6 +20,8 @@ import {
 import { Loader2 } from 'lucide-react';
 import type { CreateTaskData, PipelineTask } from '@/types/analytics';
 import type { User } from '@/types/users';
+import { pipelineTaskTemplatesService } from '@/services/pipelines/pipelineTaskTemplatesService';
+import type { PipelineTaskTemplate } from '@/types/pipelineTaskTemplates';
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -28,6 +30,14 @@ interface CreateTaskModalProps {
   loading?: boolean;
   availableUsers?: User[];
   parentTask?: PipelineTask | null;
+}
+
+function dueDateFromDays(days: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  date.setHours(9, 0, 0, 0);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 export default function CreateTaskModal({
@@ -39,6 +49,8 @@ export default function CreateTaskModal({
   parentTask = null,
 }: CreateTaskModalProps) {
   const { t } = useLanguage('pipelines');
+  const [templates, setTemplates] = useState<PipelineTaskTemplate[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
   const [formData, setFormData] = useState<CreateTaskData>({
     title: '',
@@ -52,7 +64,14 @@ export default function CreateTaskModal({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Update parent_task_id when parentTask changes
+  useEffect(() => {
+    if (!open) return;
+    pipelineTaskTemplatesService
+      .list({ active: true })
+      .then(setTemplates)
+      .catch(() => setTemplates([]));
+  }, [open]);
+
   useEffect(() => {
     if (parentTask) {
       setFormData(prev => ({
@@ -62,7 +81,6 @@ export default function CreateTaskModal({
     }
   }, [parentTask]);
 
-  // Reset form when modal opens/closes
   useEffect(() => {
     if (!open) {
       setFormData({
@@ -74,9 +92,29 @@ export default function CreateTaskModal({
         assigned_to_id: '',
         parent_task_id: null,
       });
+      setSelectedTemplateId('');
       setErrors({});
     }
   }, [open]);
+
+  const applyTemplate = (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    if (!templateId) return;
+    const template = templates.find(item => item.id === templateId);
+    if (!template) return;
+
+    setFormData(prev => ({
+      ...prev,
+      title: template.title,
+      description: template.description || '',
+      task_type: template.task_type,
+      priority: template.priority,
+      due_date:
+        template.due_in_days != null && template.due_in_days >= 0
+          ? dueDateFromDays(template.due_in_days)
+          : prev.due_date,
+    }));
+  };
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -157,6 +195,24 @@ export default function CreateTaskModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {templates.length > 0 && (
+            <div className="space-y-2">
+              <Label>{t('taskTemplates.selectLabel')}</Label>
+              <Select value={selectedTemplateId || undefined} onValueChange={applyTemplate} disabled={loading}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t('taskTemplates.selectPlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {templates.map(template => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title">

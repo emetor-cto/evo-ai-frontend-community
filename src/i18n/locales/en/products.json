@@ -64,7 +64,9 @@
     "labelsHint": "Categories help filter products and may also be used by automation rules.",
     "skuPlaceholder": "SKU-001",
     "purchaseUrlPlaceholder": "https://...",
-    "digitalNoStockHint": "Digital products have no stock."
+    "digitalNoStockHint": "Digital products have no stock.",
+    "commission": "Commission",
+    "commissionHint": "Commission amount associated with this product."
   },
   "media": {
     "uploadHint": "Drag images here or use the button below.",

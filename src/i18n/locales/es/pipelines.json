@@ -655,6 +655,27 @@
       "overdue": "atrasadas"
     }
   },
+  "taskTemplates": {
+    "title": "Plantillas de tareas",
+    "subtitle": "Crea plantillas reutilizables y selecciónalas al agregar tareas en las tarjetas del pipeline.",
+    "new": "Nueva plantilla",
+    "edit": "Editar plantilla",
+    "empty": "Aún no hay plantillas.",
+    "loading": "Cargando plantillas...",
+    "inactive": "Inactivo",
+    "dueInDays": "Vence en {{days}} día(s)",
+    "dueInDaysLabel": "Plazo predeterminado (días desde hoy)",
+    "dueInDaysPlaceholder": "Ej: 3",
+    "selectLabel": "Usar plantilla",
+    "selectPlaceholder": "Selecciona una plantilla (opcional)",
+    "created": "Plantilla creada",
+    "updated": "Plantilla actualizada",
+    "deleted": "Plantilla eliminada",
+    "loadError": "Error al cargar plantillas",
+    "saveError": "Error al guardar plantilla",
+    "deleteConfirm": "¿Eliminar esta plantilla de tarea?",
+    "active": "Activo"
+  },
   "tasks": {
     "title": "Tareas",
     "newTask": "Nueva Tarea",

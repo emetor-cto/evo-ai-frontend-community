@@ -638,6 +638,27 @@
       "overdue": "en retard"
     }
   },
+  "taskTemplates": {
+    "title": "Modèles de tâches",
+    "subtitle": "Créez des modèles réutilisables et sélectionnez-les lors de l’ajout de tâches sur les cartes du pipeline.",
+    "new": "Nouveau modèle",
+    "edit": "Modifier le modèle",
+    "empty": "Aucun modèle pour le moment.",
+    "loading": "Chargement des modèles...",
+    "inactive": "Inactif",
+    "dueInDays": "Échéance dans {{days}} jour(s)",
+    "dueInDaysLabel": "Échéance par défaut (jours à partir d’aujourd’hui)",
+    "dueInDaysPlaceholder": "Ex: 3",
+    "selectLabel": "Utiliser un modèle",
+    "selectPlaceholder": "Sélectionner un modèle (optionnel)",
+    "created": "Modèle créé",
+    "updated": "Modèle mis à jour",
+    "deleted": "Modèle supprimé",
+    "loadError": "Échec du chargement des modèles",
+    "saveError": "Échec de l’enregistrement du modèle",
+    "deleteConfirm": "Supprimer ce modèle de tâche ?",
+    "active": "Actif"
+  },
   "tasks": {
     "title": "Tâches",
     "newTask": "Nouvelle Tâche",

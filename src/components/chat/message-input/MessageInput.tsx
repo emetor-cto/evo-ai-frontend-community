@@ -725,7 +725,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
               onPickMedia={() => document.getElementById('composer-file-input-media')?.click()}
               onOpenConversationNote={() => setNotesMode(true)}
               onSchedule={() => setShowScheduleModal(true)}
-              onOpenTemplates={isWhatsAppCloud ? handleTemplateClick : undefined}
+              onOpenTemplates={isWhatsApp ? handleTemplateClick : undefined}
             />
 
             {/* Emoji */}

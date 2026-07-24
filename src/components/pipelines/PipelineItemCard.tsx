@@ -248,7 +248,7 @@ export default function PipelineItemCard({
       {/* Services Total Value */}
       {item.services_info?.has_services &&
         item.services_info.total_value > 0 && (
-          <div className="mb-3 pt-2 border-t border-border">
+          <div className="mb-3 pt-2 border-t border-border space-y-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                 <div className="w-3 h-3">
@@ -267,6 +267,18 @@ export default function PipelineItemCard({
                 {item.services_info.formatted_total}
               </div>
             </div>
+            {(item.services_info.total_commission ?? 0) > 0 && (
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{t('kanban.item.commissionLabel', 'Comissão:')}</span>
+                <span>
+                  {(item.services_info.currency || 'BRL')}{' '}
+                  {Number(item.services_info.total_commission).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </div>
+            )}
           </div>
         )}
 

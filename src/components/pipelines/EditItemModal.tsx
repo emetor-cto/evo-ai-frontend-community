@@ -32,8 +32,9 @@ import {
   PopoverTrigger,
 } from '@evoapi/design-system';
 import { Plus, Trash2, ChevronsUpDown, Check } from 'lucide-react';
-import { PipelineItem, PipelineStage, Pipeline, PipelineTask, CreateTaskData, UpdateTaskData, PipelineServiceDefinition } from '@/types/analytics';
-import pipelineServiceDefinitionsService from '@/services/pipelines/pipelineServiceDefinitionsService';
+import { PipelineItem, PipelineStage, Pipeline, PipelineTask, CreateTaskData, UpdateTaskData } from '@/types/analytics';
+import { productsService } from '@/services/products/productsService';
+import type { Product } from '@/types/products';
 import PipelineItemCustomAttributes from './PipelineItemCustomAttributes';
 import PipelineTasksList, { PipelineTasksListRef } from './tasks/PipelineTasksList';
 import CreateTaskModal from './tasks/CreateTaskModal';
@@ -42,6 +43,8 @@ import EditTaskModal from './tasks/EditTaskModal';
 interface Service {
   name: string;
   value: string;
+  product_id?: string;
+  commission?: string;
 }
 
 interface EditItemModalProps {
@@ -77,7 +80,7 @@ export default function EditItemModal({
   const [currency, setCurrency] = useState('BRL');
   const [customAttributes, setCustomAttributes] = useState<Record<string, unknown>>({});
   const [activeTab, setActiveTab] = useState('details');
-  const [catalogServices, setCatalogServices] = useState<PipelineServiceDefinition[]>([]);
+  const [productsCatalog, setProductsCatalog] = useState<Product[]>([]);
   const [openServicePopover, setOpenServicePopover] = useState<number | null>(null);
 
   // Task modals state
@@ -128,11 +131,15 @@ export default function EditItemModal({
       const { services: _services, currency: _currency, ...customAttrs } = item.custom_fields || {};
       setCustomAttributes(customAttrs);
 
-      // Fetch service catalog for this pipeline
-      pipelineServiceDefinitionsService
-        .getServiceDefinitions(item.pipeline_id)
-        .then((data) => { if (!cancelled) setCatalogServices(data); })
-        .catch(() => { if (!cancelled) setCatalogServices([]); });
+      // Load products catalog for the Services tab
+      productsService
+        .getProducts({ per_page: 500, status: 'active' })
+        .then((response) => {
+          if (!cancelled) setProductsCatalog((response.data as Product[]) || []);
+        })
+        .catch(() => {
+          if (!cancelled) setProductsCatalog([]);
+        });
     }
 
     return () => { cancelled = true; };
@@ -159,25 +166,35 @@ export default function EditItemModal({
     setServices(services.filter((_, i) => i !== index));
   };
 
-  const updateService = (index: number, field: 'name' | 'value', value: string) => {
+  const updateService = (index: number, field: 'name' | 'value' | 'commission', value: string) => {
     const updatedServices = [...services];
-    updatedServices[index][field] = value;
+    updatedServices[index] = { ...updatedServices[index], [field]: value };
     setServices(updatedServices);
   };
 
-  const selectCatalogService = (index: number, catalogService: PipelineServiceDefinition) => {
+  const selectProduct = (index: number, product: Product) => {
     const updatedServices = [...services];
     updatedServices[index] = {
-      name: catalogService.name,
-      value: catalogService.default_value.toString(),
+      name: product.name,
+      value: String(product.default_price ?? 0),
+      product_id: product.id,
+      commission: String(product.commission ?? 0),
     };
     setServices(updatedServices);
+    // Selecting a product drives the card BRL total via services values.
+    setCurrency(product.currency || 'BRL');
     setOpenServicePopover(null);
   };
 
   const calculateTotalValue = () => {
     return services.reduce((total, service) => {
       return total + (parseFloat(service.value) || 0);
+    }, 0);
+  };
+
+  const calculateTotalCommission = () => {
+    return services.reduce((total, service) => {
+      return total + (parseFloat(service.commission || '0') || 0);
     }, 0);
   };
 
@@ -383,49 +400,40 @@ export default function EditItemModal({
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0" align="start">
+                        <PopoverContent className="w-[320px] p-0" align="start">
                           <Command filter={(value, search) => {
-                            const item = catalogServices.find(cs => cs.id === value);
-                            if (!item) return 0;
-                            if (item.name.toLowerCase().includes(search.toLowerCase())) return 1;
+                            const product = productsCatalog.find(p => p.id === value);
+                            if (!product) return 0;
+                            if (product.name.toLowerCase().includes(search.toLowerCase())) return 1;
                             return 0;
                           }}>
                             <CommandInput
-                              placeholder={t('editItem.searchService') || 'Buscar ou digitar serviço...'}
-                              value={service.name}
-                              onValueChange={(value) => updateService(index, 'name', value)}
+                              placeholder={t('editItem.searchProduct') || 'Buscar produto...'}
                             />
                             <CommandList>
                               <CommandEmpty>
-                                {service.name ? (
-                                  <button
-                                    type="button"
-                                    className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded cursor-pointer"
-                                    onClick={() => setOpenServicePopover(null)}
-                                  >
-                                    {t('editItem.useCustomService', { name: service.name })}
-                                  </button>
-                                ) : (
-                                  <span>{t('editItem.noServicesFound') || 'Nenhum serviço encontrado'}</span>
-                                )}
+                                <span>{t('editItem.noProductsFound') || 'Nenhum produto encontrado'}</span>
                               </CommandEmpty>
-                              {catalogServices.length > 0 && (
-                                <CommandGroup heading={t('editItem.catalogServices') || 'Catálogo de serviços'}>
-                                  {catalogServices.map((cs) => (
+                              {productsCatalog.length > 0 && (
+                                <CommandGroup heading={t('editItem.productsCatalog') || 'Produtos'}>
+                                  {productsCatalog.map((product) => (
                                     <CommandItem
-                                      key={cs.id}
-                                      value={cs.id}
-                                      onSelect={() => selectCatalogService(index, cs)}
+                                      key={product.id}
+                                      value={product.id}
+                                      onSelect={() => selectProduct(index, product)}
                                     >
                                       <Check
                                         className={`mr-2 h-4 w-4 ${
-                                          service.name === cs.name ? 'opacity-100' : 'opacity-0'
+                                          service.product_id === product.id ? 'opacity-100' : 'opacity-0'
                                         }`}
                                       />
                                       <div className="flex flex-col">
-                                        <span>{cs.name}</span>
+                                        <span>{product.name}</span>
                                         <span className="text-xs text-muted-foreground">
-                                          {cs.currency} {cs.formatted_default_value}
+                                          {product.currency} {Number(product.default_price || 0).toFixed(2)}
+                                          {Number(product.commission || 0) > 0
+                                            ? ` · ${t('editItem.commission') || 'Comissão'}: ${Number(product.commission).toFixed(2)}`
+                                            : ''}
                                         </span>
                                       </div>
                                     </CommandItem>
@@ -446,23 +454,39 @@ export default function EditItemModal({
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                    <Input
-                      type="number"
-                      placeholder={t('editItem.serviceValue')}
-                      value={service.value}
-                      onChange={e => updateService(index, 'value', e.target.value)}
-                      step="0.01"
-                      min="0"
-                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        type="number"
+                        placeholder={t('editItem.serviceValue')}
+                        value={service.value}
+                        onChange={e => updateService(index, 'value', e.target.value)}
+                        step="0.01"
+                        min="0"
+                      />
+                      <Input
+                        type="number"
+                        placeholder={t('editItem.commission') || 'Comissão'}
+                        value={service.commission || ''}
+                        onChange={e => updateService(index, 'commission', e.target.value)}
+                        step="0.01"
+                        min="0"
+                      />
+                    </div>
                   </div>
                 ))}
 
                 {/* Total Value Display */}
-                <div className="pt-3 border-t border-border">
+                <div className="pt-3 border-t border-border space-y-1">
                   <div className="flex justify-between items-center text-sm font-medium">
                     <span className="text-muted-foreground">{t('editItem.totalValue')}</span>
                     <span className="text-green-600 dark:text-green-400">
                       {currency} {formatCurrency(calculateTotalValue())}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">{t('editItem.totalCommission') || 'Comissão total'}</span>
+                    <span className="text-muted-foreground">
+                      {currency} {formatCurrency(calculateTotalCommission())}
                     </span>
                   </div>
                 </div>

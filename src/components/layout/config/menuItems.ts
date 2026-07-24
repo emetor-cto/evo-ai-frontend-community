@@ -261,6 +261,11 @@ export const getCustomerMenuItems = (t: (key: string) => string): MenuItem[] => 
         action: 'read',
       },
       {
+        name: t('menu.settings.pipelineTaskTemplates'),
+        href: '/settings/pipeline-task-templates',
+        icon: List,
+      },
+      {
         name: t('menu.settings.crmForms'),
         href: '/settings/crm-forms',
         icon: FileText,

@@ -35,6 +35,7 @@ export interface Product {
   description?: string | null;
   sku?: string | null;
   default_price: number;
+  commission?: number;
   currency: ProductCurrency;
   purchase_url?: string | null;
   status: ProductStatus;
@@ -58,6 +59,7 @@ export interface ProductFormData {
   description?: string;
   sku?: string;
   default_price: number;
+  commission?: number;
   currency: ProductCurrency;
   purchase_url?: string;
   status: ProductStatus;

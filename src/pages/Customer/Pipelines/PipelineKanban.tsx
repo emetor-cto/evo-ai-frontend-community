@@ -184,8 +184,8 @@ export default function PipelineKanban() {
   const filtersKeyRef = useRef(filtersKey);
 
   const loadStageItems = useCallback(
-    async (stageId: string, page: number, append: boolean) => {
-      if (!pipelineId) return;
+    async (stageId: string, page: number, append: boolean): Promise<PipelineItem[] | null> => {
+      if (!pipelineId) return null;
 
       // Replace loads bump the generation so older in-flight responses are dropped.
       // Append (load more) reuses the current generation — so a slow page-1 cannot
@@ -221,7 +221,7 @@ export default function PipelineKanban() {
           stageRequestIdRef.current[stageId] !== requestId ||
           pipelineLoadIdRef.current !== loadIdAtStart
         ) {
-          return;
+          return null;
         }
 
         const items = response.data || [];
@@ -247,12 +247,14 @@ export default function PipelineKanban() {
           ...prev,
           [stageId]: { page, hasNext, total, loading: false },
         }));
+
+        return items;
       } catch (error) {
         if (
           stageRequestIdRef.current[stageId] !== requestId ||
           pipelineLoadIdRef.current !== loadIdAtStart
         ) {
-          return;
+          return null;
         }
         console.error('Error loading stage items:', error);
         setStagePagination(prev => ({
@@ -264,6 +266,7 @@ export default function PipelineKanban() {
             loading: false,
           },
         }));
+        return null;
       }
     },
     [pipelineId, itemListParams],
@@ -340,8 +343,8 @@ export default function PipelineKanban() {
   };
 
   // Drag and drop handlers
-  const handleDragStart = (item: PipelineItem) => {
-    setDraggedItem(item);
+  const handleDragStart = (item: PipelineItem, sourceStageId: string) => {
+    setDraggedItem({ ...item, stage_id: sourceStageId, pipeline_stage_id: sourceStageId });
     isDraggingRef.current = true;
     suppressClickUntilRef.current = Date.now() + 200;
   };
@@ -350,46 +353,126 @@ export default function PipelineKanban() {
     e.preventDefault();
   };
 
+  const applyOptimisticMove = (
+    item: PipelineItem,
+    fromStageId: string,
+    toStageId: string,
+  ): PipelineItem => {
+    const updatedItem: PipelineItem = {
+      ...item,
+      stage_id: toStageId,
+      pipeline_stage_id: toStageId,
+    };
+
+    setStages(prev =>
+      prev.map(stage => {
+        if (stage.id === fromStageId) {
+          return {
+            ...stage,
+            items: (stage.items || []).filter(existing => existing.id !== item.id),
+          };
+        }
+        if (stage.id === toStageId) {
+          const withoutDup = (stage.items || []).filter(existing => existing.id !== item.id);
+          return { ...stage, items: [updatedItem, ...withoutDup] };
+        }
+        return stage;
+      }),
+    );
+
+    setStagePagination(prev => {
+      const from = prev[fromStageId];
+      const to = prev[toStageId];
+      return {
+        ...prev,
+        [fromStageId]: {
+          page: from?.page ?? 1,
+          hasNext: from?.hasNext ?? false,
+          total: Math.max(0, (from?.total ?? 1) - 1),
+          loading: from?.loading ?? false,
+        },
+        [toStageId]: {
+          page: to?.page ?? 1,
+          hasNext: to?.hasNext ?? false,
+          total: (to?.total ?? 0) + 1,
+          loading: to?.loading ?? false,
+        },
+      };
+    });
+
+    return updatedItem;
+  };
+
   const handleDrop = async (e: React.DragEvent, targetStageId: string) => {
     e.preventDefault();
 
-    if (!draggedItem) return;
+    if (!draggedItem || !pipelineId) return;
 
-    // Don't move if dropping on same stage
-    if (draggedItem.stage_id === targetStageId) {
+    const movedItem = draggedItem;
+    const fromStageId =
+      stagesRef.current.find(stage => (stage.items || []).some(item => item.id === movedItem.id))
+        ?.id ||
+      movedItem.stage_id ||
+      movedItem.pipeline_stage_id;
+
+    if (!fromStageId || fromStageId === targetStageId) {
       setDraggedItem(null);
       return;
     }
 
-    // Capture before async operations
-    const movedItem = draggedItem;
-    const fromStageId = movedItem.stage_id;
-    const willBeHidden = hasActiveFilters && filterItems([movedItem]).length === 0;
+    const stagesSnapshot = stagesRef.current.map(stage => ({
+      id: stage.id,
+      items: [...(stage.items || [])],
+    }));
+    const paginationSnapshot = Object.fromEntries(
+      Object.entries(stagePagination).map(([id, state]) => [id, { ...state }]),
+    );
+
+    applyOptimisticMove(movedItem, fromStageId, targetStageId);
+    setDraggedItem(null);
 
     try {
       await pipelinesService.moveItem({
         item_id: movedItem.id,
-        pipeline_id: pipelineId!,
+        pipeline_id: pipelineId,
         from_stage_id: fromStageId,
         to_stage_id: targetStageId,
       });
 
-      // Refresh only the affected columns (not the whole board payload)
-      await Promise.all([
+      toast.success(t('kanban.messages.itemMoved'));
+
+      const [sourceItems, destinationItems] = await Promise.all([
         loadStageItems(fromStageId, 1, false),
         loadStageItems(targetStageId, 1, false),
       ]);
-      toast.success(t('kanban.messages.itemMoved'));
-      if (willBeHidden) {
-        toast.info(t('kanban.messages.itemHiddenByFilter'), {
-          action: { label: t('kanban.search.clearFilters'), onClick: clearFilters },
-        });
+
+      const stillOnSource = (sourceItems || []).some(item => item.id === movedItem.id);
+      const landedOnDestination = (destinationItems || []).some(item => item.id === movedItem.id);
+
+      if (stillOnSource || (sourceItems === null && destinationItems === null)) {
+        // Source still shows the card, or both refreshes were dropped/failed — keep optimistic UI.
+        applyOptimisticMove(movedItem, fromStageId, targetStageId);
+      } else if (sourceItems !== null && destinationItems !== null && !landedOnDestination) {
+        if (hasActiveFilters) {
+          toast.info(t('kanban.messages.itemHiddenByFilter'), {
+            action: { label: t('kanban.search.clearFilters'), onClick: clearFilters },
+          });
+        } else {
+          // Columns refreshed without the card (pagination/automation race) — keep it on target.
+          applyOptimisticMove(movedItem, fromStageId, targetStageId);
+        }
       }
     } catch (error) {
       console.error('Error moving item:', error);
+      setStages(prev =>
+        prev.map(stage => {
+          const snap = stagesSnapshot.find(entry => entry.id === stage.id);
+          return snap ? { ...stage, items: snap.items } : stage;
+        }),
+      );
+      setStagePagination(paginationSnapshot);
       toast.error(t('kanban.messages.itemMoveError'));
     } finally {
-      setDraggedItem(null);
       isDraggingRef.current = false;
       suppressClickUntilRef.current = Date.now() + 200;
     }
@@ -1330,7 +1413,7 @@ export default function PipelineKanban() {
                           key={item.id}
                           className="group bg-background rounded-xl p-4 border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 cursor-pointer select-none relative"
                           draggable
-                          onDragStart={() => handleDragStart(item)}
+                          onDragStart={() => handleDragStart(item, stage.id)}
                           onDragEnd={handleDragEnd}
                           onClick={() => {
                             if (isDraggingRef.current || Date.now() <= suppressClickUntilRef.current) {

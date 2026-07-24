@@ -260,6 +260,7 @@ export interface PipelineItem {
   days_in_current_stage?: number;
   services_info?: {
     total_value: number;
+    total_commission?: number;
     currency: string;
     formatted_total: string;
     services_count: number;

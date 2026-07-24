@@ -51,11 +51,11 @@
     "activateSuccess": "Pipeline ativado com sucesso",
     "deactivateSuccess": "Pipeline desativado com sucesso",
     "toggleError": "Erro ao alterar status do pipeline",
+    "setAsDefaultSuccess": "Pipeline marcado como padrão com sucesso",
+    "setAsDefaultError": "Erro ao marcar pipeline como padrão",
     "noPermissionRead": "Você não tem permissão para visualizar pipelines",
     "noPermissionCreate": "Você não tem permissão para criar pipelines",
-    "noPermissionUpdate": "Você não tem permissão para atualizar pipelines",
-    "setAsDefaultError": "Erro ao marcar pipeline como padrão",
-    "setAsDefaultSuccess": "Pipeline marcado como padrão com sucesso"
+    "noPermissionUpdate": "Você não tem permissão para atualizar pipelines"
   },
   "addItem": {
     "title": "Adicionar Item ao Pipeline",
@@ -104,6 +104,12 @@
       "private": "Privado",
       "public": "Público",
       "team": "Equipe"
+    },
+    "teamSelection": {
+      "label": "Equipes",
+      "placeholder": "Selecione as equipes...",
+      "required": "Selecione pelo menos uma equipe",
+      "noTeams": "Nenhuma equipe disponível"
     },
     "stages": "Etapas do Pipeline",
     "stagesCount": "{{count}} etapas",
@@ -288,21 +294,26 @@
       "usd": "Dólar Americano (USD)",
       "eur": "Euro (EUR)"
     },
-    "services": "Serviços",
-    "addService": "Adicionar Serviço",
-    "noServices": "Nenhum serviço adicionado",
-    "serviceName": "Nome do serviço",
-    "searchService": "Pesquisar ou digitar serviço...",
+    "services": "Produtos / Serviços",
+    "addService": "Adicionar Produto",
+    "noServices": "Nenhum produto adicionado",
+    "serviceName": "Produto",
+    "searchService": "Buscar produto...",
+    "searchProduct": "Buscar produto...",
     "useCustomService": "Usar \"{{name}}\" como novo serviço",
-    "noServicesFound": "Nenhum serviço encontrado",
-    "catalogServices": "Catálogo de serviços",
-    "serviceValue": "Valor do serviço",
+    "noServicesFound": "Nenhum produto encontrado",
+    "noProductsFound": "Nenhum produto encontrado",
+    "catalogServices": "Produtos",
+    "productsCatalog": "Produtos",
+    "serviceValue": "Valor da venda",
+    "commission": "Comissão",
+    "totalCommission": "Comissão total",
     "value": "Valor",
     "totalValue": "Valor Total:",
     "notes": "Observações",
     "notesPlaceholder": "Adicione observações sobre este item no pipeline...",
     "customAttributes": "Atributos Personalizados",
-    "servicesDescription": "Gerencie os serviços associados a este item",
+    "servicesDescription": "Selecione produtos do catálogo. O valor do card será atualizado automaticamente.",
     "attributesDescription": "Configure atributos personalizados para este item",
     "tabs": {
       "details": "Detalhes",
@@ -315,8 +326,8 @@
     "save": "Salvar Alterações"
   },
   "editConversation": {
-    "title": "Editar Conversa no Pipeline",
-    "description": "Detalhes da conversa",
+    "title": "Editar Item no Pipeline",
+    "description": "Detalhes do item",
     "unknownUser": "Usuário Desconhecido",
     "currentStage": "Etapa Atual",
     "chooseStage": "Escolha uma etapa",
@@ -364,6 +375,12 @@
       "public": "Público",
       "team": "Equipe"
     },
+    "teamSelection": {
+      "label": "Equipes",
+      "placeholder": "Selecione as equipes...",
+      "required": "Selecione pelo menos uma equipe",
+      "noTeams": "Nenhuma equipe disponível"
+    },
     "pipelineActive": "Pipeline ativo",
     "cancel": "Cancelar",
     "saving": "Salvando...",
@@ -384,21 +401,40 @@
     "selectAgent": "Selecionar agente...",
     "selectPipeline": "Selecionar pipeline...",
     "selectLabel": "Selecionar etiqueta...",
+    "selectAgentBot": "Selecionar agente de IA...",
+    "selectTemplate": "Selecionar template...",
     "noOtherStages": "Nenhuma outra etapa disponível",
     "noOtherPipelines": "Nenhum outro pipeline disponível",
     "noStagesInPipeline": "Nenhuma etapa no pipeline selecionado",
     "noAgents": "Nenhum agente disponível",
+    "noAgentBots": "Nenhum agente de IA disponível",
+    "noTemplates": "Nenhum template disponível",
     "noLabels": "Nenhuma etiqueta disponível",
+    "aiMessagePlaceholder": "O que o agente deve falar? (opcional)",
+    "directMessagePlaceholder": "Mensagem a enviar...",
+    "finalizeMessagePlaceholder": "Mensagem de encerramento (opcional)...",
+    "inactivity": {
+      "minutes": "minutos",
+      "base": {
+        "no_customer_reply": "Cliente sem responder",
+        "stage_stagnation": "Parado na etapa"
+      }
+    },
     "triggers": {
       "label_added": "Etiqueta adicionada",
-      "conversation_status_changed": "Estado da conversa alterado",
-      "custom_attribute_updated": "Atributo personalizado atualizado"
+      "conversation_status_changed": "Status da conversa alterado",
+      "custom_attribute_updated": "Atributo personalizado atualizado",
+      "inactivity": "Por inatividade"
     },
     "actions": {
       "move_to_stage": "Mover para etapa",
       "move_to_pipeline": "Mover para outro pipeline",
       "assign_agent": "Atribuir agente",
-      "apply_label": "Aplicar etiqueta"
+      "apply_label": "Aplicar etiqueta",
+      "send_ai_message": "Mensagem via agente de IA",
+      "send_direct_message": "Mensagem direta",
+      "send_template": "Enviar template",
+      "finalize": "Finalizar atendimento"
     }
   },
   "editStage": {
@@ -453,7 +489,7 @@
     "view": "Visualizar",
     "setAsDefault": "Marcar como padrão",
     "stats": {
-      "items": "Itens",
+      "items": "Items",
       "stages": "Etapas",
       "completion": "Conclusão",
       "type": "Tipo",
@@ -539,16 +575,16 @@
     "remove": "Remover do Pipeline"
   },
   "removeConversation": {
-    "title": "Remover Conversa do Pipeline",
+    "title": "Remover Item do Pipeline",
     "description": "Esta ação não pode ser desfeita.",
-    "confirmMessage": "Tem certeza que deseja remover a conversa de",
+    "confirmMessage": "Tem certeza que deseja remover o item de",
     "unknownUser": "Usuário Desconhecido",
-    "details": "Detalhes da conversa:",
+    "details": "Detalhes do item:",
     "contact": "Contato:",
     "id": "ID:",
     "status": "Status:",
     "inbox": "Inbox:",
-    "note": "A conversa será apenas removida do pipeline, mas continuará existindo no sistema.",
+    "note": "O item será apenas removido do pipeline, mas continuará existindo no sistema.",
     "cancel": "Cancelar",
     "removing": "Removendo...",
     "remove": "Remover do Pipeline"
@@ -564,14 +600,14 @@
   },
   "kanban": {
     "search": {
-      "placeholder": "Pesquisar por nome, telefone, email...",
+      "placeholder": "Buscar por nome, telefone, email...",
       "assigneeFilter": "Responsável",
       "clearFilters": "Limpar filtros",
       "noResults": "Nenhum card corresponde aos filtros",
       "resultsCount": "Mostrando {{count}} de {{total}} cards em {{stages}} etapa(s)",
       "loadingAgents": "Carregando equipe...",
       "noAgents": "Nenhum membro da equipe encontrado",
-      "statusFilter": "Estado",
+      "statusFilter": "Status",
       "dateRangeFilter": "Período",
       "dateFrom": "De",
       "dateTo": "Até",
@@ -603,7 +639,10 @@
       "deleteStage": "Deletar Etapa",
       "noConversations": "Nenhuma conversa nesta etapa",
       "noStages": "Nenhuma etapa encontrada para este pipeline",
-      "totalValue": "R$ {{value}}"
+      "totalValue": "R$ {{value}}",
+      "loadMore": "Carregar mais",
+      "loadingMore": "Carregando...",
+      "showingOf": "Mostrando {{loaded}} de {{total}}"
     },
     "item": {
       "unknownUser": "Usuário Desconhecido",
@@ -623,7 +662,8 @@
     },
     "conversation": {
       "unknownUser": "Usuário Desconhecido",
-      "editConversation": "Editar Conversa",
+      "editConversation": "Editar Item",
+      "editItem": "Editar Item",
       "removeFromPipeline": "Remover do Pipeline",
       "noInbox": "Sem Inbox",
       "status": {
@@ -635,8 +675,10 @@
       "system": "Sistema"
     },
     "messages": {
-      "conversationMoved": "Conversa movida com sucesso",
-      "conversationMoveError": "Erro ao mover conversa",
+      "itemMoved": "Item movido com sucesso",
+      "itemMoveError": "Erro ao mover item",
+      "conversationMoved": "Item movido com sucesso",
+      "conversationMoveError": "Erro ao mover item",
       "loadDataError": "Erro ao carregar dados do pipeline",
       "stageCreated": "Etapa criada com sucesso",
       "stageCreateError": "Erro ao criar etapa",
@@ -664,6 +706,27 @@
       "overdue": "atrasadas"
     }
   },
+  "taskTemplates": {
+    "title": "Modelos de tarefas",
+    "subtitle": "Crie modelos reutilizáveis e selecione-os ao adicionar tarefas nos cards da pipeline.",
+    "new": "Novo modelo",
+    "edit": "Editar modelo",
+    "empty": "Nenhum modelo cadastrado ainda.",
+    "loading": "Carregando modelos...",
+    "inactive": "Inativo",
+    "dueInDays": "Vence em {{days}} dia(s)",
+    "dueInDaysLabel": "Prazo padrão (dias a partir de hoje)",
+    "dueInDaysPlaceholder": "Ex: 3",
+    "selectLabel": "Usar modelo",
+    "selectPlaceholder": "Selecione um modelo (opcional)",
+    "created": "Modelo criado",
+    "updated": "Modelo atualizado",
+    "deleted": "Modelo excluído",
+    "loadError": "Erro ao carregar modelos",
+    "saveError": "Erro ao salvar modelo",
+    "deleteConfirm": "Excluir este modelo de tarefa?",
+    "active": "Ativo"
+  },
   "tasks": {
     "title": "Tarefas",
     "newTask": "Nova Tarefa",
@@ -680,7 +743,7 @@
       "completed": "Concluídas"
     },
     "types": {
-      "call": "Chamada",
+      "call": "Ligação",
       "email": "E-mail",
       "meeting": "Reunião",
       "follow_up": "Follow-up",
@@ -707,7 +770,7 @@
       "title": "Título",
       "titlePlaceholder": "Ex: Ligar para cliente",
       "description": "Descrição",
-      "descriptionPlaceholder": "Adicionar detalhes sobre a tarefa...",
+      "descriptionPlaceholder": "Adicione detalhes sobre a tarefa...",
       "type": "Tipo",
       "priority": "Prioridade",
       "dueDate": "Data de Vencimento",
@@ -728,11 +791,11 @@
     },
     "createModal": {
       "title": "Criar Nova Tarefa",
-      "description": "Adicionar uma nova tarefa ao item da pipeline."
+      "description": "Adicione uma nova tarefa ao item do pipeline."
     },
     "editModal": {
       "title": "Editar Tarefa",
-      "description": "Atualizar informações da tarefa."
+      "description": "Atualize as informações da tarefa."
     },
     "actions": {
       "move": "Mover",

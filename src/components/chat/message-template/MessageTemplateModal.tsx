@@ -7,6 +7,7 @@ import {
   DialogDescription,
 } from '@evoapi/design-system/dialog';
 import MessageTemplateService from '@/services/channels/messageTemplatesService';
+import GlobalMessageTemplateService from '@/services/messageTemplates/globalMessageTemplatesService';
 import { useLanguage } from '@/hooks/useLanguage';
 import { toast } from 'sonner';
 import TemplatesPicker from './TemplatesPicker';
@@ -30,6 +31,20 @@ interface MessageTemplateModalProps {
       processed_params: Record<string, string>;
     };
   }) => void;
+}
+
+function mergeTemplates(
+  inboxTemplates: MessageTemplate[],
+  globalTemplates: MessageTemplate[],
+): MessageTemplate[] {
+  const byId = new Map<string, MessageTemplate>();
+  for (const template of [...globalTemplates, ...inboxTemplates]) {
+    if (!template?.id) continue;
+    byId.set(template.id, template);
+  }
+  return Array.from(byId.values()).sort((a, b) =>
+    (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }),
+  );
 }
 
 const MessageTemplateModal: React.FC<MessageTemplateModalProps> = ({
@@ -68,11 +83,20 @@ const MessageTemplateModal: React.FC<MessageTemplateModalProps> = ({
 
     const loadTemplates = async () => {
       try {
-        const response = await MessageTemplateService.getTemplates(inboxId);
+        const [inboxResponse, globalResponse] = await Promise.all([
+          MessageTemplateService.getTemplates(inboxId, { per_page: 100 }).catch(() => null),
+          // Global Settings templates (channel_id nil) are excluded from inbox-scoped
+          // lists — merge them so Evolution/Go (and other non-Cloud) chats can pick them.
+          GlobalMessageTemplateService.getTemplates({ per_page: 100 }).catch(() => null),
+        ]);
 
         if (cancelled) return;
 
-        const templates = response?.data || [];
+        const inboxTemplates = inboxResponse?.data || [];
+        const globalTemplates = isWhatsAppCloud
+          ? []
+          : (globalResponse?.data || []).filter(template => template.active !== false);
+        const templates = mergeTemplates(inboxTemplates, globalTemplates);
 
         if (templates.length === 0) {
           toast.info(t('messageTemplates.noTemplates'));
@@ -100,7 +124,7 @@ const MessageTemplateModal: React.FC<MessageTemplateModalProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [isOpen, inboxId, t, onClose]);
+  }, [isOpen, inboxId, isWhatsAppCloud, t, onClose]);
 
   const handleSelectTemplate = (template: MessageTemplate) => {
     setSelectedTemplate(template);

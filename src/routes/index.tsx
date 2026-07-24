@@ -63,6 +63,7 @@ import NewCampaign from '@/pages/Customer/Campaigns/NewCampaign/NewCampaign';
 import CannedResponses from '@/pages/Customer/Settings/CannedResponses';
 import MessageTemplates from '@/pages/Customer/Settings/MessageTemplates';
 import { Macros } from '@/pages/Customer/Settings/Macros';
+import PipelineTaskTemplates from '@/pages/Customer/Settings/PipelineTaskTemplates';
 import Products, { ProductsImport } from '@/pages/Customer/Settings/Products';
 import { NotebookPage, NotebookDocumentPage } from '@/pages/Customer/Notebook';
 import CrmForms from '@/pages/Customer/Settings/CrmForms';
@@ -889,6 +890,19 @@ const AppRouter = () => {
                     <PermissionRoute resource="macros" action="read">
                       <Macros />
                     </PermissionRoute>
+                  </MainLayout>
+                </CustomerRoute>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/settings/pipeline-task-templates"
+            element={
+              <PrivateRoute>
+                <CustomerRoute>
+                  <MainLayout>
+                    <PipelineTaskTemplates />
                   </MainLayout>
                 </CustomerRoute>
               </PrivateRoute>
