@@ -237,11 +237,15 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
 
     const payload: ProductFormData = {
       ...form,
+      sku: form.sku?.trim() ? form.sku.trim() : undefined,
       default_price: form.default_price ?? 0,
       commission: form.commission ?? 0,
       stock_quantity: isPhysical ? form.stock_quantity : null,
       labels,
-      variants_attributes: variantsPayload,
+      variants_attributes: variantsPayload.map((v) => ({
+        ...v,
+        sku: v.sku?.trim() ? v.sku.trim() : undefined,
+      })),
     };
 
     try {
