@@ -35,6 +35,7 @@ import { Plus, Trash2, ChevronsUpDown, Check } from 'lucide-react';
 import { PipelineItem, PipelineStage, Pipeline, PipelineTask, CreateTaskData, UpdateTaskData } from '@/types/analytics';
 import { productsService } from '@/services/products/productsService';
 import type { Product } from '@/types/products';
+import { formatProductAmount } from '@/utils/products/formatProductPrice';
 import PipelineItemCustomAttributes from './PipelineItemCustomAttributes';
 import PipelineTasksList, { PipelineTasksListRef } from './tasks/PipelineTasksList';
 import CreateTaskModal from './tasks/CreateTaskModal';
@@ -430,9 +431,9 @@ export default function EditItemModal({
                                       <div className="flex flex-col">
                                         <span>{product.name}</span>
                                         <span className="text-xs text-muted-foreground">
-                                          {product.currency} {Number(product.default_price || 0).toFixed(2)}
+                                          {product.currency} {formatProductAmount(Number(product.default_price || 0))}
                                           {Number(product.commission || 0) > 0
-                                            ? ` · ${t('editItem.commission') || 'Comissão'}: ${Number(product.commission).toFixed(2)}`
+                                            ? ` · ${t('editItem.commission') || 'Comissão'}: ${formatProductAmount(Number(product.commission))}`
                                             : ''}
                                         </span>
                                       </div>

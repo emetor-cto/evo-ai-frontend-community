@@ -6,6 +6,7 @@ import { Package, Cloud, Search } from 'lucide-react';
 import { productsService } from '@/services/products/productsService';
 import type { Agent } from '@/types/agents';
 import type { Product } from '@/types/products';
+import { formatProductAmount } from '@/utils/products/formatProductPrice';
 
 interface Props {
   agent: Agent;
@@ -144,7 +145,7 @@ export default function ProductsSection({ agent }: Props) {
                   <div className="text-sm font-medium">{product.name}</div>
                   <div className="text-xs text-muted-foreground">
                     {tp(`kind.${product.kind}`)} · {product.currency}{' '}
-                    {Number(product.default_price).toFixed(2)}
+                    {formatProductAmount(Number(product.default_price))}
                   </div>
                 </div>
                 {product.sku && (

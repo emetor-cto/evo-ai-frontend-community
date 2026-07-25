@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { useLanguage } from '@/hooks/useLanguage';
 import {
   Dialog,
@@ -52,12 +53,35 @@ const STATUSES: ProductStatus[] = ['active', 'inactive', 'draft'];
 const CURRENCIES: ProductCurrency[] = ['BRL', 'USD', 'EUR'];
 const URL_REGEX = /^https?:\/\/.+/i;
 
-// Empty input → null; non-numeric input (e.g. a pasted string) → null instead of NaN,
-// which would otherwise leak into the payload and bypass form validation.
+// Accepts "10.50", "10,50" and "1.234,56" (pt-BR). Empty / invalid → null (not NaN).
 function toNumberOrNull(value: string): number | null {
-  if (value.trim() === '') return null;
-  const parsed = Number(value);
-  return Number.isNaN(parsed) ? null : parsed;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  let normalized = trimmed;
+  if (trimmed.includes(',') && trimmed.includes('.')) {
+    // 1.234,56 → 1234.56
+    normalized = trimmed.replace(/\./g, '').replace(',', '.');
+  } else if (trimmed.includes(',')) {
+    // 10,50 → 10.50
+    normalized = trimmed.replace(',', '.');
+  }
+
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function validateForm(
+  form: ProductFormState,
+  t: (key: string) => string,
+): Record<string, string> {
+  const e: Record<string, string> = {};
+  if (!form.name.trim()) e.name = t('validation.nameRequired');
+  if (form.default_price == null) e.default_price = t('validation.priceRequired');
+  else if (form.default_price < 0) e.default_price = t('validation.priceMin');
+  if (form.purchase_url && !URL_REGEX.test(form.purchase_url)) e.purchase_url = t('validation.urlInvalid');
+  if (form.commission != null && form.commission < 0) e.commission = t('validation.priceMin');
+  return e;
 }
 
 function emptyForm(): ProductFormState {
@@ -94,6 +118,9 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
   const [form, setForm] = useState<ProductFormState>(emptyForm());
   const [variants, setVariants] = useState<ProductVariantFormData[]>([]);
   const [labelsText, setLabelsText] = useState('');
+  // Raw text so "10,50" / partial "10," stay visible (controlled number value would wipe commas).
+  const [priceInput, setPriceInput] = useState('');
+  const [commissionInput, setCommissionInput] = useState('');
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
@@ -118,10 +145,28 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
         labels: product.labels ?? [],
         variants_attributes: [],
       });
+      setPriceInput(
+        product.default_price == null
+          ? ''
+          : Number(product.default_price).toLocaleString('en-US', {
+              useGrouping: false,
+              maximumFractionDigits: 6,
+            }),
+      );
+      setCommissionInput(
+        product.commission != null && Number(product.commission) !== 0
+          ? Number(product.commission).toLocaleString('en-US', {
+              useGrouping: false,
+              maximumFractionDigits: 6,
+            })
+          : '',
+      );
       setVariants((product.variants ?? []).map(variantToForm));
       setLabelsText((product.labels ?? []).join(', '));
     } else {
       setForm(emptyForm());
+      setPriceInput('');
+      setCommissionInput('');
       setVariants([]);
       setLabelsText('');
     }
@@ -130,14 +175,10 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
     setActiveTab('general');
   }, [open, product]);
 
-  const clientErrors = useMemo<Record<string, string>>(() => {
-    const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = t('validation.nameRequired');
-    if (form.default_price == null) e.default_price = t('validation.priceRequired');
-    else if (form.default_price < 0) e.default_price = t('validation.priceMin');
-    if (form.purchase_url && !URL_REGEX.test(form.purchase_url)) e.purchase_url = t('validation.urlInvalid');
-    return e;
-  }, [form.name, form.default_price, form.purchase_url, t]);
+  const clientErrors = useMemo(
+    () => validateForm(form, t),
+    [form.name, form.default_price, form.purchase_url, form.commission, t],
+  );
 
   const fieldError = (key: string): string | undefined =>
     errors?.[key] ?? (submitAttempted || touched[key] ? clientErrors[key] : undefined);
@@ -168,8 +209,12 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
 
   const handleSubmit = async () => {
     setSubmitAttempted(true);
-    if (!canSubmit) {
+
+    // Re-validate from current form state (avoid relying only on memoized canSubmit).
+    const nextErrors = validateForm(form, t);
+    if (Object.keys(nextErrors).length > 0) {
       setActiveTab('general');
+      toast.error(t('validation.formErrors'));
       return;
     }
 
@@ -178,20 +223,30 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
       .map((s) => s.trim())
       .filter(Boolean);
 
+    // Drop blank new variants so they never block create with nested validation errors.
+    const variantsPayload = variants
+      .filter((v) => v._destroy || Boolean(v.name?.trim()))
+      .map((v, idx) => ({
+        ...v,
+        stock_quantity: isPhysical ? v.stock_quantity : null,
+        position: v.position ?? idx,
+      }));
+
     const payload: ProductFormData = {
       ...form,
       default_price: form.default_price ?? 0,
       commission: form.commission ?? 0,
       stock_quantity: isPhysical ? form.stock_quantity : null,
       labels,
-      variants_attributes: variants.map((v, idx) => ({
-        ...v,
-        stock_quantity: isPhysical ? v.stock_quantity : null,
-        position: v.position ?? idx,
-      })),
+      variants_attributes: variantsPayload,
     };
 
-    await onSubmit(payload);
+    try {
+      await onSubmit(payload);
+    } catch (error) {
+      // Parent already toasts / maps field errors; keep modal from dying silently.
+      console.error('ProductModal.submit error:', error);
+    }
   };
 
   return (
@@ -202,6 +257,14 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
           <DialogDescription>{t('modal.subtitle')}</DialogDescription>
         </DialogHeader>
 
+        <form
+          noValidate
+          className="flex flex-col flex-1 overflow-hidden gap-0"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleSubmit();
+          }}
+        >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
           {/*
             Media tab intentionally omitted: product image upload is not wired
@@ -284,16 +347,17 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
                   </Label>
                   <Input
                     id="p-price"
-                    type="number"
-                    step="0.01"
-                    min={0}
+                    type="text"
+                    inputMode="decimal"
                     aria-required="true"
                     aria-invalid={Boolean(fieldError('default_price'))}
-                    value={form.default_price ?? ''}
+                    value={priceInput}
                     placeholder="0,00"
-                    onChange={(e) =>
-                      setForm({ ...form, default_price: toNumberOrNull(e.target.value) })
-                    }
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      setPriceInput(raw);
+                      setForm({ ...form, default_price: toNumberOrNull(raw) });
+                    }}
                     onBlur={() => markTouched('default_price')}
                   />
                   {fieldError('default_price') && (
@@ -349,7 +413,8 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
                 <Label htmlFor="p-url">{t('fields.purchaseUrl')}</Label>
                 <Input
                   id="p-url"
-                  type="url"
+                  type="text"
+                  inputMode="url"
                   aria-invalid={Boolean(fieldError('purchase_url'))}
                   placeholder={t('fields.purchaseUrlPlaceholder')}
                   value={form.purchase_url ?? ''}
@@ -376,15 +441,20 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
                 <Label htmlFor="p-commission">{t('fields.commission')}</Label>
                 <Input
                   id="p-commission"
-                  type="number"
-                  step="0.01"
-                  min={0}
-                  value={form.commission ?? ''}
+                  type="text"
+                  inputMode="decimal"
+                  aria-invalid={Boolean(fieldError('commission'))}
+                  value={commissionInput}
                   placeholder="0,00"
-                  onChange={(e) =>
-                    setForm({ ...form, commission: toNumberOrNull(e.target.value) })
-                  }
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    setCommissionInput(raw);
+                    setForm({ ...form, commission: toNumberOrNull(raw) });
+                  }}
                 />
+                {fieldError('commission') && (
+                  <p className="text-xs text-destructive">{fieldError('commission')}</p>
+                )}
                 <p className="text-xs text-muted-foreground">{t('fields.commissionHint')}</p>
               </div>
             </div>
@@ -427,9 +497,8 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
                       <Label htmlFor={`p-variant-${idx}-price`} className="text-xs">{t('variants.priceOverride')}</Label>
                       <Input
                         id={`p-variant-${idx}-price`}
-                        type="number"
-                        step="0.01"
-                        min={0}
+                        type="text"
+                        inputMode="decimal"
                         value={variant.price_override ?? ''}
                         onChange={(e) =>
                           handleVariantChange(idx, {
@@ -456,6 +525,7 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
                     )}
                     <div className="col-span-1 flex justify-end">
                       <Button
+                        type="button"
                         variant="ghost"
                         size="icon"
                         onClick={() => handleVariantRemove(idx)}
@@ -470,7 +540,7 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
               })}
             </div>
 
-            <Button variant="outline" size="sm" onClick={handleAddVariant}>
+            <Button type="button" variant="outline" size="sm" onClick={handleAddVariant}>
               <Plus className="h-4 w-4 mr-2" />
               {t('variants.add')}
             </Button>
@@ -495,13 +565,14 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
           >
             {submitAttempted && !canSubmit ? t('validation.fixErrors') : t('validation.requiredLegend')}
           </p>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             {t('actions.cancel')}
           </Button>
-          <Button onClick={handleSubmit} disabled={loading}>
+          <Button type="submit" disabled={loading}>
             {loading ? t('actions.saving') : isEdit ? t('actions.update') : t('actions.create')}
           </Button>
         </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

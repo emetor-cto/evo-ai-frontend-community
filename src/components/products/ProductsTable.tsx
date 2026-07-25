@@ -2,6 +2,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { Button, Badge } from '@evoapi/design-system';
 import { Pencil, Trash2, Package, Cloud } from 'lucide-react';
 import type { Product } from '@/types/products';
+import { formatProductPrice } from '@/utils/products/formatProductPrice';
 import { stockInfo } from './productStock';
 
 interface Props {
@@ -17,18 +18,6 @@ const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'outline'> = {
   inactive: 'secondary',
   draft: 'outline',
 };
-
-function formatPrice(value: number, currency: string) {
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency,
-      maximumFractionDigits: 2,
-    }).format(value);
-  } catch {
-    return `${currency} ${value.toFixed(2)}`;
-  }
-}
 
 export default function ProductsTable({
   products,
@@ -76,7 +65,7 @@ export default function ProductsTable({
                 <td className="px-3 py-2 text-muted-foreground">{product.sku ?? '—'}</td>
                 <td className="px-3 py-2">{t(`kind.${product.kind}`)}</td>
                 <td className="px-3 py-2 font-mono text-xs">
-                  {formatPrice(product.default_price, product.currency)}
+                  {formatProductPrice(product.default_price, product.currency)}
                 </td>
                 <td className="px-3 py-2">
                   {stock == null ? (

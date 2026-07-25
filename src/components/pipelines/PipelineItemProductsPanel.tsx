@@ -22,22 +22,11 @@ import type {
   Product,
   ProductCurrency,
 } from '@/types/products';
+import { formatProductPrice } from '@/utils/products/formatProductPrice';
 
 interface Props {
   pipelineItemId: string;
   canEdit?: boolean;
-}
-
-function formatPrice(value: number, currency: string) {
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency,
-      maximumFractionDigits: 2,
-    }).format(value);
-  } catch {
-    return `${currency} ${value.toFixed(2)}`;
-  }
 }
 
 export default function PipelineItemProductsPanel({ pipelineItemId, canEdit = true }: Props) {
@@ -137,7 +126,7 @@ export default function PipelineItemProductsPanel({ pipelineItemId, canEdit = tr
           <p className="text-xs text-muted-foreground">
             {links.length === 0
               ? t('pipelinePanel.empty')
-              : t('pipelinePanel.summary', { count: links.length, total: formatPrice(totalValue, currency) })}
+              : t('pipelinePanel.summary', { count: links.length, total: formatProductPrice(totalValue, currency) })}
           </p>
         </div>
         {canEdit && (
@@ -169,11 +158,11 @@ export default function PipelineItemProductsPanel({ pipelineItemId, canEdit = tr
                     )}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {link.quantity} × {formatPrice(link.locked_unit_price, link.currency)}
+                    {link.quantity} × {formatProductPrice(link.locked_unit_price, link.currency)}
                   </div>
                 </div>
                 <div className="text-sm font-mono">
-                  {formatPrice(link.subtotal, link.currency)}
+                  {formatProductPrice(link.subtotal, link.currency)}
                 </div>
                 {canEdit && (
                   <Button
@@ -207,7 +196,7 @@ export default function PipelineItemProductsPanel({ pipelineItemId, canEdit = tr
                 <SelectContent>
                   {productOptions.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
-                      {p.name} ({formatPrice(p.default_price, p.currency)})
+                      {p.name} ({formatProductPrice(p.default_price, p.currency)})
                     </SelectItem>
                   ))}
                 </SelectContent>

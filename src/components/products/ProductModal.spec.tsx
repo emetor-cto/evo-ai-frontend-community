@@ -78,4 +78,15 @@ describe('ProductModal (EVO-1783 Phase 1)', () => {
     expect(submitSpy).not.toHaveBeenCalled();
     expect(screen.getByText('validation.priceRequired')).toBeTruthy();
   });
+
+  it('accepts Brazilian decimal price (comma) and submits', async () => {
+    const submitSpy = vi.fn(async () => {});
+    render(<ProductModal open product={null} loading={false} onOpenChange={noop} onSubmit={submitSpy} />);
+    fireEvent.change(document.getElementById('p-name') as HTMLInputElement, { target: { value: 'Produto' } });
+    fireEvent.change(document.getElementById('p-price') as HTMLInputElement, { target: { value: '10,50' } });
+    fireEvent.click(screen.getByText('actions.create').closest('button') as HTMLButtonElement);
+    await vi.waitFor(() => expect(submitSpy).toHaveBeenCalledTimes(1));
+    expect(submitSpy.mock.calls[0][0].default_price).toBe(10.5);
+    expect(submitSpy.mock.calls[0][0].commission).toBe(0);
+  });
 });
