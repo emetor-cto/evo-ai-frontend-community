@@ -285,7 +285,10 @@
     },
     "cancel": "Annuler",
     "saving": "Enregistrement...",
-    "save": "Enregistrer les Modifications"
+    "save": "Enregistrer les Modifications",
+    "commission": "Commission (%)",
+    "commissionAmountHint": "Montant calculé : {{currency}} {{amount}}",
+    "totalCommission": "Commission totale"
   },
   "editConversation": {
     "title": "Modifier la Conversation dans le Pipeline",

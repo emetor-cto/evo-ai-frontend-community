@@ -31,6 +31,7 @@ import type {
   ProductStatus,
   ProductCurrency,
 } from '@/types/products';
+import { formatProductAmount } from '@/utils/products/formatProductPrice';
 
 // default_price is nullable in the form so an empty input stays empty (not 0),
 // letting validation require an explicit price. It is coerced on submit.
@@ -80,7 +81,9 @@ function validateForm(
   if (form.default_price == null) e.default_price = t('validation.priceRequired');
   else if (form.default_price < 0) e.default_price = t('validation.priceMin');
   if (form.purchase_url && !URL_REGEX.test(form.purchase_url)) e.purchase_url = t('validation.urlInvalid');
-  if (form.commission != null && form.commission < 0) e.commission = t('validation.priceMin');
+  if (form.commission != null && (form.commission < 0 || form.commission > 100)) {
+    e.commission = t('validation.commissionRange');
+  }
   return e;
 }
 
@@ -439,23 +442,37 @@ export default function ProductModal({ open, product, loading, errors, onOpenCha
 
               <div className="col-span-2 space-y-1.5">
                 <Label htmlFor="p-commission">{t('fields.commission')}</Label>
-                <Input
-                  id="p-commission"
-                  type="text"
-                  inputMode="decimal"
-                  aria-invalid={Boolean(fieldError('commission'))}
-                  value={commissionInput}
-                  placeholder="0,00"
-                  onChange={(e) => {
-                    const raw = e.target.value;
-                    setCommissionInput(raw);
-                    setForm({ ...form, commission: toNumberOrNull(raw) });
-                  }}
-                />
+                <div className="relative">
+                  <Input
+                    id="p-commission"
+                    type="text"
+                    inputMode="decimal"
+                    aria-invalid={Boolean(fieldError('commission'))}
+                    value={commissionInput}
+                    placeholder="0"
+                    className="pr-8"
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      setCommissionInput(raw);
+                      setForm({ ...form, commission: toNumberOrNull(raw) });
+                    }}
+                  />
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    %
+                  </span>
+                </div>
                 {fieldError('commission') && (
                   <p className="text-xs text-destructive">{fieldError('commission')}</p>
                 )}
                 <p className="text-xs text-muted-foreground">{t('fields.commissionHint')}</p>
+                {form.default_price != null && form.commission != null && form.commission > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {t('fields.commissionPreview', {
+                      amount: formatProductAmount((form.default_price * form.commission) / 100),
+                      currency: form.currency,
+                    })}
+                  </p>
+                )}
               </div>
             </div>
           </TabsContent>

@@ -45,7 +45,17 @@ interface Service {
   name: string;
   value: string;
   product_id?: string;
+  /** Monetary commission amount (derived from value × percent / 100). */
   commission?: string;
+  /** Commission percentage of the sale value (0–100). */
+  commission_percent?: string;
+}
+
+function commissionAmountFrom(value: string, percent: string | undefined): string {
+  const v = parseFloat(value) || 0;
+  const p = parseFloat(percent || '0') || 0;
+  const amount = (v * p) / 100;
+  return Number.isFinite(amount) ? String(Number(amount.toFixed(6))) : '0';
 }
 
 interface EditItemModalProps {
@@ -124,7 +134,16 @@ export default function EditItemModal({
     if (open && item) {
       setNotes(item.notes || '');
       setSelectedStageId(item.stage_id);
-      setServices(item.custom_fields?.services || []);
+      setServices(
+        (item.custom_fields?.services || []).map((s: Record<string, unknown>) => ({
+          name: String(s.name ?? ''),
+          value: String(s.value ?? ''),
+          product_id: s.product_id != null ? String(s.product_id) : undefined,
+          commission: s.commission != null ? String(s.commission) : undefined,
+          commission_percent:
+            s.commission_percent != null ? String(s.commission_percent) : undefined,
+        })),
+      );
       setCurrency(item.custom_fields?.currency || 'BRL');
 
       // Extract custom attributes from custom_fields (backend stores them together)
@@ -167,19 +186,35 @@ export default function EditItemModal({
     setServices(services.filter((_, i) => i !== index));
   };
 
-  const updateService = (index: number, field: 'name' | 'value' | 'commission', value: string) => {
+  const updateService = (
+    index: number,
+    field: 'name' | 'value' | 'commission' | 'commission_percent',
+    value: string,
+  ) => {
     const updatedServices = [...services];
-    updatedServices[index] = { ...updatedServices[index], [field]: value };
+    const current = { ...updatedServices[index], [field]: value };
+
+    if (field === 'value' || field === 'commission_percent') {
+      current.commission = commissionAmountFrom(current.value, current.commission_percent);
+    } else if (field === 'commission') {
+      // Legacy manual money edit — clear percent so totals use the explicit amount.
+      current.commission_percent = undefined;
+    }
+
+    updatedServices[index] = current;
     setServices(updatedServices);
   };
 
   const selectProduct = (index: number, product: Product) => {
+    const value = String(product.default_price ?? 0);
+    const percent = String(product.commission ?? 0);
     const updatedServices = [...services];
     updatedServices[index] = {
       name: product.name,
-      value: String(product.default_price ?? 0),
+      value,
       product_id: product.id,
-      commission: String(product.commission ?? 0),
+      commission_percent: percent,
+      commission: commissionAmountFrom(value, percent),
     };
     setServices(updatedServices);
     // Selecting a product drives the card BRL total via services values.
@@ -195,6 +230,9 @@ export default function EditItemModal({
 
   const calculateTotalCommission = () => {
     return services.reduce((total, service) => {
+      if (service.commission_percent != null && service.commission_percent !== '') {
+        return total + (parseFloat(commissionAmountFrom(service.value, service.commission_percent)) || 0);
+      }
       return total + (parseFloat(service.commission || '0') || 0);
     }, 0);
   };
@@ -433,7 +471,7 @@ export default function EditItemModal({
                                         <span className="text-xs text-muted-foreground">
                                           {product.currency} {formatProductAmount(Number(product.default_price || 0))}
                                           {Number(product.commission || 0) > 0
-                                            ? ` · ${t('editItem.commission') || 'Comissão'}: ${formatProductAmount(Number(product.commission))}`
+                                            ? ` · ${t('editItem.commission') || 'Comissão'}: ${formatProductAmount(Number(product.commission))}%`
                                             : ''}
                                         </span>
                                       </div>
@@ -466,13 +504,29 @@ export default function EditItemModal({
                       />
                       <Input
                         type="number"
-                        placeholder={t('editItem.commission') || 'Comissão'}
-                        value={service.commission || ''}
-                        onChange={e => updateService(index, 'commission', e.target.value)}
+                        placeholder={t('editItem.commission') || 'Comissão (%)'}
+                        value={service.commission_percent || ''}
+                        onChange={e => updateService(index, 'commission_percent', e.target.value)}
                         step="0.01"
                         min="0"
+                        max="100"
                       />
                     </div>
+                    {(parseFloat(service.commission_percent || '0') > 0 ||
+                      parseFloat(service.commission || '0') > 0) && (
+                      <p className="text-xs text-muted-foreground">
+                        {t('editItem.commissionAmountHint', {
+                          currency,
+                          amount: formatCurrency(
+                            parseFloat(
+                              service.commission_percent
+                                ? commissionAmountFrom(service.value, service.commission_percent)
+                                : service.commission || '0',
+                            ) || 0,
+                          ),
+                        })}
+                      </p>
+                    )}
                   </div>
                 ))}
 

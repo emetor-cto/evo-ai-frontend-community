@@ -306,7 +306,7 @@
     "catalogServices": "Products",
     "productsCatalog": "Products",
     "serviceValue": "Sale value",
-    "commission": "Commission",
+    "commission": "Commission (%)",
     "totalCommission": "Total commission",
     "value": "Value",
     "totalValue": "Total Value:",
@@ -323,7 +323,8 @@
     },
     "cancel": "Cancel",
     "saving": "Saving...",
-    "save": "Save Changes"
+    "save": "Save Changes",
+    "commissionAmountHint": "Calculated amount: {{currency}} {{amount}}"
   },
   "editConversation": {
     "title": "Edit Conversation in Pipeline",

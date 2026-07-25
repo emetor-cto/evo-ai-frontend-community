@@ -35,7 +35,10 @@ export interface Product {
   description?: string | null;
   sku?: string | null;
   default_price: number;
+  /** Commission as a percentage of the product price (0–100). */
   commission?: number;
+  /** Monetary amount = default_price × (commission% / 100). Computed by the API. */
+  commission_amount?: number;
   currency: ProductCurrency;
   purchase_url?: string | null;
   status: ProductStatus;
@@ -59,6 +62,7 @@ export interface ProductFormData {
   description?: string;
   sku?: string;
   default_price: number;
+  /** Commission as a percentage of the product price (0–100). */
   commission?: number;
   currency: ProductCurrency;
   purchase_url?: string;

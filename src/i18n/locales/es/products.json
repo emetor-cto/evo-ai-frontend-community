@@ -65,8 +65,9 @@
     "skuPlaceholder": "SKU-001",
     "purchaseUrlPlaceholder": "https://...",
     "digitalNoStockHint": "Los productos digitales no tienen stock.",
-    "commission": "Commission",
-    "commissionHint": "Commission amount associated with this product."
+    "commission": "Comisión (%)",
+    "commissionHint": "Porcentaje de comisión sobre el precio del producto (0 a 100).",
+    "commissionPreview": "≈ {{currency}} {{amount}} sobre el precio actual"
   },
   "media": {
     "uploadHint": "Arrastre imágenes aquí o use el botón de abajo.",
@@ -237,6 +238,7 @@
     "requiredLegend": "Los campos marcados con * son obligatorios",
     "skuTaken": "Este SKU ya está en uso",
     "variantPriceCurrency": "en {{currency}}",
-    "fixErrors": "Completa los campos obligatorios para continuar."
+    "fixErrors": "Completa los campos obligatorios para continuar.",
+    "commissionRange": "La comisión debe estar entre 0 y 100%"
   }
 }
