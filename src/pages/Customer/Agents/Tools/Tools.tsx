@@ -43,7 +43,7 @@ export default function Tools() {
   const { t } = useLanguage('tools');
   const { can, isReady: permissionsReady } = useUserPermissions();
   const [state, setState] = useState<ToolsState>(INITIAL_STATE);
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [detailsTool, setDetailsTool] = useState<Tool | null>(null);
   const [filterModalOpen, setFilterModalOpen] = useState(false);

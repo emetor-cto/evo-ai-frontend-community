@@ -63,7 +63,7 @@ export default function Pipelines() {
   const { can, isReady: permissionsReady } = useUserPermissions();
   const navigate = useNavigate();
   const [state, setState] = useState<PipelinesState>(INITIAL_STATE);
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [pipelineToDelete, setPipelineToDelete] = useState<Pipeline | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);

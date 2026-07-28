@@ -50,7 +50,7 @@ const Agentes = () => {
 
   const [state, setState] = useState<AgentsState>(INITIAL_STATE);
   const [isApiKeysModalOpen, setIsApiKeysModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<string>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');

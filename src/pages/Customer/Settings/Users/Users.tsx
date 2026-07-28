@@ -65,7 +65,7 @@ export default function Users() {
   const { can, isReady: permissionsReady } = useUserPermissions();
   const { currentUser } = useAuthStore();
   const [state, setState] = useState<UsersState>(INITIAL_STATE);
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);

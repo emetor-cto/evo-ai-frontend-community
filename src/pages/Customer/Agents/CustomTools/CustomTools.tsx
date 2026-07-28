@@ -44,7 +44,7 @@ export default function CustomTools() {
   const isWizardEdit = !!editToolId && location.pathname.endsWith('/edit');
   const isWizardOpen = isWizardCreate || isWizardEdit;
   const [state, setState] = useState<CustomToolsState>(INITIAL_STATE);
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [toolToDelete, setToolToDelete] = useState<CustomTool | null>(null);
 

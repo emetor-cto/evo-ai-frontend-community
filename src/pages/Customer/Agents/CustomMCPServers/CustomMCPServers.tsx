@@ -65,7 +65,7 @@ export default function CustomMCPServers() {
   const { can, isReady: permissionsReady } = useUserPermissions();
   const { t } = useLanguage('customMcpServers');
   const [state, setState] = useState<CustomMcpServersState>(INITIAL_STATE);
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [serverToDelete, setServerToDelete] = useState<CustomMcpServer | null>(null);
 

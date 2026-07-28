@@ -40,7 +40,7 @@ export default function MCPServers() {
   const { t } = useLanguage('customerMcpServers');
   const { can, isReady: permissionsReady } = useUserPermissions();
   const [state, setState] = useState<MCPServersState>(INITIAL_STATE);
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [detailsServer, setDetailsServer] = useState<MCPServer | null>(null);
   const hasLoaded = useRef(false);
