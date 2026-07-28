@@ -27,6 +27,23 @@ function findSubItem(href: string): SubMenuItem {
   throw new Error(`Sub item with href ${href} not found`);
 }
 
+describe('menuItems — Channels/Campaigns/Journeys/Automations under Settings', () => {
+  it('nests channels, automation, journeys and campaigns under Settings (not top-level)', () => {
+    const items = getCustomerMenuItems(t);
+    const topLevelHrefs = items.map(i => i.href);
+
+    expect(topLevelHrefs).not.toContain('/channels');
+    expect(topLevelHrefs).not.toContain('/automation');
+    expect(topLevelHrefs).not.toContain('/journeys');
+    expect(topLevelHrefs).not.toContain('/campaigns');
+
+    expect(findSubItem('/channels').resource).toBe('channels');
+    expect(findSubItem('/automation').resource).toBe('automation_rules');
+    expect(findSubItem('/journeys').resource).toBe('journeys');
+    expect(findSubItem('/campaigns').resource).toBe('campaigns');
+  });
+});
+
 describe('menuItems — Settings > Atendentes gating (AC4)', () => {
   it('gates the Atendentes item on users.manage (administrative), not users.read', () => {
     const atendentes = findSubItem('/settings/users');
