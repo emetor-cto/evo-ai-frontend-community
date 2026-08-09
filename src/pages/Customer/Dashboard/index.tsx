@@ -11,7 +11,6 @@ import { usersService } from '@/services/users';
 import { customerDashboardService } from '@/services/dashboard/customerDashboardService';
 import type { CustomerDashboardParams, CustomerDashboardResponse } from '@/types/analytics/dashboard';
 import DashboardFiltersDialog from './components/DashboardFiltersDialog';
-import DashboardMetricsSection from './components/DashboardMetricsSection';
 import DashboardTrendsSection from './components/DashboardTrendsSection';
 import DashboardPerformanceSection from './components/DashboardPerformanceSection';
 import DashboardTasksCard from './components/DashboardTasksCard';
@@ -298,9 +297,6 @@ const CustomerDashboardPage = () => {
 
       <DashboardTasksCard />
 
-      <div data-tour="dashboard-metrics">
-        <DashboardMetricsSection data={data} t={t} />
-      </div>
       <div data-tour="dashboard-trends">
         <DashboardTrendsSection data={data} t={t} channelShareData={channelShareData} />
       </div>
