@@ -879,6 +879,7 @@
     "due": "Vence",
     "schedule": "Agendamento",
     "scheduledFor": "Agendado para",
+    "overdue": "Atrasada",
     "tabs": {
       "negotiations": "Negociações",
       "tasks": "Tarefas",

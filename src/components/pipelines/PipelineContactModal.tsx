@@ -129,17 +129,22 @@ export default function PipelineContactModal({
         preferred ? String(preferred.uuid || preferred.id) : conversationUuid || null,
       );
 
-      // Load pending tasks for each negotiation (cap parallel requests).
+      // Load open tasks (pending + overdue) for each negotiation.
+      // Card badge uses overdue_count separately; filtering only `pending` hid those.
       const rows = (pipelinesData as NegotiationRow[]) || [];
       const limited = rows.slice(0, 12);
       const taskLists = await Promise.all(
         limited.map(async row => {
           const pid = row.pipeline.id;
           try {
-            const res = await pipelineTasksService.getTasksForItem(pid, row.item.id, {
-              status: 'pending',
-            });
-            return (res.data as PipelineTask[]) || [];
+            const [pendingRes, overdueRes] = await Promise.all([
+              pipelineTasksService.getTasksForItem(pid, row.item.id, { status: 'pending' }),
+              pipelineTasksService.getTasksForItem(pid, row.item.id, { status: 'overdue' }),
+            ]);
+            return [
+              ...((pendingRes.data as PipelineTask[]) || []),
+              ...((overdueRes.data as PipelineTask[]) || []),
+            ];
           } catch {
             return [] as PipelineTask[];
           }
@@ -316,7 +321,14 @@ export default function PipelineContactModal({
                           <div className="flex items-start gap-2">
                             <CheckSquare className="h-4 w-4 mt-0.5 text-muted-foreground" />
                             <div className="min-w-0">
-                              <p className="text-sm font-medium truncate">{task.title}</p>
+                              <div className="flex items-center gap-2 min-w-0">
+                                <p className="text-sm font-medium truncate">{task.title}</p>
+                                {task.status === 'overdue' || task.overdue ? (
+                                  <Badge variant="destructive" className="shrink-0">
+                                    {t('contactModal.overdue', 'Atrasada')}
+                                  </Badge>
+                                ) : null}
+                              </div>
                               <p className="text-xs text-muted-foreground">
                                 {t('contactModal.due', 'Vence')}: {formatDateTime(task.due_date)}
                                 {task.priority ? ` · ${task.priority}` : ''}

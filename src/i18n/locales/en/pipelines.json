@@ -878,6 +878,7 @@
     "due": "Due",
     "schedule": "Scheduled action",
     "scheduledFor": "Scheduled for",
+    "overdue": "Overdue",
     "tabs": {
       "negotiations": "Negotiations",
       "tasks": "Tasks",
