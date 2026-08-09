@@ -93,7 +93,8 @@
       "tutorials": "Tutorial",
       "settings": "Impostazioni",
       "campaigns": "Campagne",
-      "journeys": "Percorsi"
+      "journeys": "Percorsi",
+      "salesTools": "Strumenti commerciali"
     },
     "contacts": {
       "list": "Contatti",
@@ -123,6 +124,13 @@
       "segments": "Segmenti",
       "crmForms": "Moduli di acquisizione",
       "chatPages": "Pagine di chat"
+    },
+    "salesTools": {
+      "hub": "Overview",
+      "conversion": "Conversion",
+      "commissioning": "Commissioning",
+      "forecast": "Forecast",
+      "prospecting": "Prospecting"
     }
   }
 }

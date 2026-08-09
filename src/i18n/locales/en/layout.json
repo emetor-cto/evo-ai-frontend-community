@@ -86,6 +86,7 @@
       "contacts": "Contacts",
       "pipelines": "Pipelines",
       "products": "Products",
+      "salesTools": "Sales Tools",
       "notebook": "Notebook",
       "agents": "AI Agents",
       "channels": "Channels",
@@ -98,6 +99,13 @@
     "contacts": {
       "list": "Contacts",
       "scheduledActions": "Scheduled Actions"
+    },
+    "salesTools": {
+      "hub": "Overview",
+      "conversion": "Conversion Calculator",
+      "commissioning": "Commissioning 2.0",
+      "forecast": "Sales Forecast 2.0",
+      "prospecting": "Weekly Prospecting"
     },
     "agents": {
       "list": "AI Agents",

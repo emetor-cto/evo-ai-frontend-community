@@ -66,6 +66,11 @@ import { Macros } from '@/pages/Customer/Settings/Macros';
 import PipelineTaskTemplates from '@/pages/Customer/Settings/PipelineTaskTemplates';
 import Products, { ProductsImport } from '@/pages/Customer/Settings/Products';
 import { NotebookPage, NotebookDocumentPage } from '@/pages/Customer/Notebook';
+import SalesToolsHub from '@/pages/Customer/SalesTools';
+import ConversionCalculator from '@/pages/Customer/SalesTools/ConversionCalculator';
+import Commissioning from '@/pages/Customer/SalesTools/Commissioning';
+import SalesForecast from '@/pages/Customer/SalesTools/SalesForecast';
+import WeeklyProspecting from '@/pages/Customer/SalesTools/WeeklyProspecting';
 import CrmForms from '@/pages/Customer/Settings/CrmForms';
 import ChatPages from '@/pages/Customer/Settings/ChatPages';
 import Templates from '@/pages/Customer/Settings/Templates/Templates';
@@ -804,6 +809,67 @@ const AppRouter = () => {
                     <PermissionRoute resource="products" action="read">
                       <Products />
                     </PermissionRoute>
+                  </MainLayout>
+                </CustomerRoute>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/sales-tools"
+            element={
+              <PrivateRoute>
+                <CustomerRoute>
+                  <MainLayout>
+                    <SalesToolsHub />
+                  </MainLayout>
+                </CustomerRoute>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/sales-tools/conversion-calculator"
+            element={
+              <PrivateRoute>
+                <CustomerRoute>
+                  <MainLayout>
+                    <ConversionCalculator />
+                  </MainLayout>
+                </CustomerRoute>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/sales-tools/commissioning"
+            element={
+              <PrivateRoute>
+                <CustomerRoute>
+                  <MainLayout>
+                    <Commissioning />
+                  </MainLayout>
+                </CustomerRoute>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/sales-tools/sales-forecast"
+            element={
+              <PrivateRoute>
+                <CustomerRoute>
+                  <MainLayout>
+                    <SalesForecast />
+                  </MainLayout>
+                </CustomerRoute>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/sales-tools/weekly-prospecting"
+            element={
+              <PrivateRoute>
+                <CustomerRoute>
+                  <MainLayout>
+                    <WeeklyProspecting />
                   </MainLayout>
                 </CustomerRoute>
               </PrivateRoute>

@@ -86,6 +86,7 @@
       "contacts": "Contatos",
       "pipelines": "Pipelines",
       "products": "Produtos",
+      "salesTools": "Ferramentas Comerciais",
       "notebook": "Caderno",
       "agents": "Agentes de IA",
       "channels": "Canais",
@@ -98,6 +99,13 @@
     "contacts": {
       "list": "Contatos",
       "scheduledActions": "Ações Agendadas"
+    },
+    "salesTools": {
+      "hub": "Visão geral",
+      "conversion": "Calculadora de Conversão",
+      "commissioning": "Comissionamento 2.0",
+      "forecast": "Previsibilidade 2.0",
+      "prospecting": "Prospecção Semanal"
     },
     "agents": {
       "list": "Agentes de IA",
