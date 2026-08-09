@@ -613,6 +613,15 @@
       "dateFrom": "From",
       "dateTo": "To",
       "labelFilter": "Label",
+      "reminderFilter": "Reminder",
+      "reminderToday": "Today",
+      "reminderUpcoming": "Upcoming",
+      "reminderLoading": "Loading...",
+      "reminderEmpty": "No reminders in this period",
+      "reminderLoadError": "Could not load reminders",
+      "reminderTask": "Task",
+      "reminderSchedule": "Scheduled action",
+      "reminderUntitled": "Untitled",
       "globalNoResults": "No cards match the current filters",
       "status": {
         "open": "Open",
@@ -844,6 +853,35 @@
       "cancel": "Cancel",
       "delete": "Delete Pipeline",
       "deleting": "Deleting..."
+    }
+  },
+  "contactModal": {
+    "title": "Contact",
+    "subtitle": "History, reminders and quick message",
+    "loading": "Loading...",
+    "loadError": "Could not load contact",
+    "lastContact": "Last contact",
+    "openConversation": "Open conversation",
+    "openFromName": "View contact",
+    "noConversation": "This contact has no conversation yet",
+    "messageSent": "Message sent",
+    "messageError": "Failed to send message",
+    "enteredAt": "Entered",
+    "completedAt": "Completed",
+    "active": "In progress",
+    "value": "Value",
+    "emptyNegotiations": "No negotiations found",
+    "emptyTasks": "No pending tasks or schedules",
+    "messagePlaceholder": "Write a message...",
+    "send": "Send",
+    "sending": "Sending...",
+    "due": "Due",
+    "schedule": "Scheduled action",
+    "scheduledFor": "Scheduled for",
+    "tabs": {
+      "negotiations": "Negotiations",
+      "tasks": "Tasks",
+      "message": "Message"
     }
   }
 }

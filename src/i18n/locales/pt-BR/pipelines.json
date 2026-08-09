@@ -613,6 +613,15 @@
       "dateFrom": "De",
       "dateTo": "Até",
       "labelFilter": "Etiqueta",
+      "reminderFilter": "Lembrete",
+      "reminderToday": "Hoje",
+      "reminderUpcoming": "Próximos",
+      "reminderLoading": "Carregando...",
+      "reminderEmpty": "Nenhum lembrete neste período",
+      "reminderLoadError": "Não foi possível carregar lembretes",
+      "reminderTask": "Tarefa",
+      "reminderSchedule": "Agendamento",
+      "reminderUntitled": "Sem título",
       "globalNoResults": "Nenhum card corresponde aos filtros ativos",
       "status": {
         "open": "Aberto",
@@ -845,6 +854,35 @@
       "cancel": "Cancelar",
       "delete": "Deletar Pipeline",
       "deleting": "Deletando..."
+    }
+  },
+  "contactModal": {
+    "title": "Contato",
+    "subtitle": "Histórico, lembretes e mensagem rápida",
+    "loading": "Carregando...",
+    "loadError": "Não foi possível carregar o contato",
+    "lastContact": "Último contato",
+    "openConversation": "Abrir conversa",
+    "openFromName": "Ver contato",
+    "noConversation": "Este contato ainda não tem conversa",
+    "messageSent": "Mensagem enviada",
+    "messageError": "Falha ao enviar mensagem",
+    "enteredAt": "Entrou",
+    "completedAt": "Concluído",
+    "active": "Em andamento",
+    "value": "Valor",
+    "emptyNegotiations": "Nenhuma negociação encontrada",
+    "emptyTasks": "Nenhuma tarefa ou agendamento pendente",
+    "messagePlaceholder": "Escreva uma mensagem...",
+    "send": "Enviar",
+    "sending": "Enviando...",
+    "due": "Vence",
+    "schedule": "Agendamento",
+    "scheduledFor": "Agendado para",
+    "tabs": {
+      "negotiations": "Negociações",
+      "tasks": "Tarefas",
+      "message": "Mensagem"
     }
   }
 }

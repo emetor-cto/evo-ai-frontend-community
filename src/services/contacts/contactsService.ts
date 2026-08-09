@@ -265,7 +265,9 @@ class ContactsService {
         item_id: string;
         type: string;
         entered_at: number;
+        completed_at?: number | null;
         notes: string | null;
+        total_value?: number;
       };
     }>> {
     const response = await api.get(`/contacts/${contactId}/pipelines`);
@@ -287,9 +289,11 @@ class ContactsService {
           item_id: string;
           type: string;
           entered_at: number;
+          completed_at?: number | null;
           notes: string | null;
+          total_value?: number;
         };
-    }>>(response);
+      }>>(response);
   }
 
   // Custom Attributes

@@ -48,6 +48,21 @@ class PipelinesService {
     return extractData<Pipeline[]>(response);
   }
 
+  // Tasks + scheduled actions due today / upcoming for the current user on this pipeline
+  async getReminders(
+    pipelineId: string,
+    period: 'today' | 'upcoming' = 'today',
+  ): Promise<{
+    period: string;
+    tasks: unknown[];
+    scheduled_actions: unknown[];
+  }> {
+    const response = await api.get(`/pipelines/${pipelineId}/reminders`, {
+      params: { period },
+    });
+    return extractData(response);
+  }
+
   // Create pipeline
   async createPipeline(data: CreatePipelineData): Promise<Pipeline> {
     const { stages, ...pipelineFields } = data;
@@ -160,6 +175,7 @@ class PipelinesService {
       entered_after?: string;
       entered_before?: string;
       status?: 'active' | 'completed' | 'all';
+      reminder?: 'today' | 'upcoming';
     },
   ): Promise<ItemsResponse> {
     const response = await api.get(`/pipelines/${pipelineId}/pipeline_items`, {
