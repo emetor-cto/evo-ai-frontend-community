@@ -1,8 +1,22 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
-import { Badge, Card, CardContent } from '@evoapi/design-system';
+import {
+  Badge,
+  Card,
+  CardContent,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@evoapi/design-system';
 import { BaseHeader } from '@/components/base';
 import type { HeaderFilter } from '@/components/base';
+import { isAdminRole } from '@/constants/roles';
 import { useLanguage } from '@/hooks/useLanguage';
 import { pipelinesService } from '@/services/pipelines';
 import TeamsService from '@/services/teams/teamsService';
@@ -10,14 +24,26 @@ import InboxesService from '@/services/channels/inboxesService';
 import { usersService } from '@/services/users';
 import { customerDashboardService } from '@/services/dashboard/customerDashboardService';
 import type { CustomerDashboardParams, CustomerDashboardResponse } from '@/types/analytics/dashboard';
+import { useCurrentUser } from '@/utils/auth';
 import DashboardFiltersDialog from './components/DashboardFiltersDialog';
 import DashboardTrendsSection from './components/DashboardTrendsSection';
 import DashboardPerformanceSection from './components/DashboardPerformanceSection';
 import DashboardTasksCard from './components/DashboardTasksCard';
 import type { DashboardFilterState, DashboardOption } from './components/types';
 import { DashboardTour } from '@/tours';
+import ConversionDashboard from './sales/ConversionDashboard';
+import CommissioningDashboard from './sales/CommissioningDashboard';
+import ForecastDashboard from './sales/ForecastDashboard';
+import ProspectingDashboard from './sales/ProspectingDashboard';
 
 const ALL_FILTER_VALUE = '__all__';
+
+type DashboardTab =
+  | 'operational'
+  | 'conversion'
+  | 'commissioning'
+  | 'forecast'
+  | 'prospecting';
 
 const toDateInputValue = (date: Date) => {
   const year = date.getFullYear();
@@ -84,8 +110,15 @@ const formatDateLabel = (value: string) => {
   return `${day}/${month}/${year}`;
 };
 
+const YEAR_OPTIONS = Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - 2 + i);
+
 const CustomerDashboardPage = () => {
   const { t } = useLanguage('customerDashboard');
+  const currentUser = useCurrentUser();
+  const canViewCommissioning =
+    !!currentUser?.role?.key && isAdminRole(currentUser.role.key);
+  const [tab, setTab] = useState<DashboardTab>('operational');
+  const [year, setYear] = useState(() => new Date().getFullYear());
   const [defaultFilters] = useState<DashboardFilterState>(() => getDefaultFilterState());
   const [data, setData] = useState<CustomerDashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -97,6 +130,15 @@ const CustomerDashboardPage = () => {
   const [teams, setTeams] = useState<DashboardOption[]>([]);
   const [inboxes, setInboxes] = useState<DashboardOption[]>([]);
   const [users, setUsers] = useState<DashboardOption[]>([]);
+
+  useEffect(() => {
+    if (tab === 'commissioning' && !canViewCommissioning) {
+      setTab('operational');
+    }
+  }, [tab, canViewCommissioning]);
+
+  const isOperational = tab === 'operational';
+  const isSalesTab = !isOperational;
 
   const loadDashboard = useCallback(async (filters: DashboardFilterState) => {
     setLoading(true);
@@ -114,8 +156,9 @@ const CustomerDashboardPage = () => {
   }, [t]);
 
   useEffect(() => {
+    if (!isOperational) return;
     loadDashboard(appliedFilters);
-  }, [appliedFilters, loadDashboard]);
+  }, [appliedFilters, loadDashboard, isOperational]);
 
   useEffect(() => {
     const loadFilterOptions = async () => {
@@ -162,6 +205,8 @@ const CustomerDashboardPage = () => {
   };
 
   const appliedHeaderFilters = useMemo<HeaderFilter[]>(() => {
+    if (!isOperational) return [];
+
     const filters: HeaderFilter[] = [];
     const pipeline = pipelines.find(item => item.id === appliedFilters.pipelineId);
     const team = teams.find(item => item.id === appliedFilters.teamId);
@@ -210,7 +255,17 @@ const CustomerDashboardPage = () => {
     }
 
     return filters;
-  }, [appliedFilters, defaultFilters.since, defaultFilters.until, inboxes, pipelines, t, teams, users]);
+  }, [
+    appliedFilters,
+    defaultFilters.since,
+    defaultFilters.until,
+    inboxes,
+    isOperational,
+    pipelines,
+    t,
+    teams,
+    users,
+  ]);
 
   useEffect(() => {
     setDraftFilters(appliedFilters);
@@ -250,31 +305,6 @@ const CustomerDashboardPage = () => {
     }));
   }, [data]);
 
-  if (loading) {
-    return (
-      <div className="h-full flex flex-col p-4 gap-6">
-        <DashboardTasksCard />
-        <div>{t('dashboard.loading') || 'Carregando dashboard...'}</div>
-      </div>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <div className="h-full flex flex-col p-4 gap-6">
-        <DashboardTasksCard />
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-red-600 font-medium">
-              <AlertTriangle className="h-4 w-4" />
-              {error || (t('dashboard.error') || 'Falha ao carregar dashboard')}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="h-full flex flex-col p-4 gap-6">
       <DashboardTour />
@@ -284,25 +314,95 @@ const CustomerDashboardPage = () => {
           subtitle={t('dashboard.subtitle')}
           filters={appliedHeaderFilters}
           onFilterClick={handleOpenFilter}
-          showFilters
+          showFilters={isOperational}
           filterButtonDataTour="dashboard-filter-button"
         />
       </div>
 
-      <div data-tour="dashboard-period-badge">
-        <Badge variant="secondary">
-          {currentPeriodLabel} ({data.period.days} dias)
-        </Badge>
-      </div>
+      <Tabs value={tab} onValueChange={value => setTab(value as DashboardTab)} className="space-y-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <TabsList className="flex flex-wrap h-auto justify-start gap-1">
+            <TabsTrigger value="operational">Operacional</TabsTrigger>
+            <TabsTrigger value="conversion">Conversão</TabsTrigger>
+            {canViewCommissioning && (
+              <TabsTrigger value="commissioning">Comissionamento</TabsTrigger>
+            )}
+            <TabsTrigger value="forecast">Previsibilidade</TabsTrigger>
+            <TabsTrigger value="prospecting">Prospecção</TabsTrigger>
+          </TabsList>
 
-      <DashboardTasksCard />
+          {isSalesTab && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Ano</span>
+              <Select value={String(year)} onValueChange={value => setYear(Number(value))}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {YEAR_OPTIONS.map(option => (
+                    <SelectItem key={option} value={String(option)}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
 
-      <div data-tour="dashboard-trends">
-        <DashboardTrendsSection data={data} t={t} channelShareData={channelShareData} />
-      </div>
-      <div data-tour="dashboard-performance">
-        <DashboardPerformanceSection data={data} t={t} />
-      </div>
+        <TabsContent value="operational" className="space-y-6 mt-0">
+          {loading ? (
+            <>
+              <DashboardTasksCard />
+              <div>{t('dashboard.loading') || 'Carregando dashboard...'}</div>
+            </>
+          ) : error || !data ? (
+            <>
+              <DashboardTasksCard />
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 text-red-600 font-medium">
+                    <AlertTriangle className="h-4 w-4" />
+                    {error || (t('dashboard.error') || 'Falha ao carregar dashboard')}
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          ) : (
+            <>
+              <div data-tour="dashboard-period-badge">
+                <Badge variant="secondary">
+                  {currentPeriodLabel} ({data.period.days} dias)
+                </Badge>
+              </div>
+
+              <DashboardTasksCard />
+
+              <div data-tour="dashboard-trends">
+                <DashboardTrendsSection data={data} t={t} channelShareData={channelShareData} />
+              </div>
+              <div data-tour="dashboard-performance">
+                <DashboardPerformanceSection data={data} t={t} />
+              </div>
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="conversion" className="mt-0">
+          <ConversionDashboard year={year} />
+        </TabsContent>
+        {canViewCommissioning && (
+          <TabsContent value="commissioning" className="mt-0">
+            <CommissioningDashboard year={year} />
+          </TabsContent>
+        )}
+        <TabsContent value="forecast" className="mt-0">
+          <ForecastDashboard year={year} />
+        </TabsContent>
+        <TabsContent value="prospecting" className="mt-0">
+          <ProspectingDashboard year={year} />
+        </TabsContent>
+      </Tabs>
 
       <DashboardFiltersDialog
         open={filterModalOpen}
