@@ -61,7 +61,7 @@ export interface ConversationsContextValue {
     query?: ConversationsQuery,
   ) => void;
   loadSpecificConversation: (conversationId: string) => Promise<Conversation | null>;
-  selectConversation: (conversationId: string | null) => void;
+  selectConversation: (conversationId: string | null) => Promise<string | null> | void;
   updateConversationStatus: (
     conversationId: string,
     status: 'open' | 'resolved' | 'pending' | 'snoozed',

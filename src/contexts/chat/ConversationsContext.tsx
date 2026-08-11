@@ -229,17 +229,20 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
   );
 
   const selectConversation = useCallback(
-    async (conversationId: string | null) => {
+    async (conversationId: string | null): Promise<string | null> => {
       // 🔒 PROTEÇÃO: Evitar seleções simultâneas
       if (selectionLockRef.current) {
-        return;
+        return conversationId;
       }
 
       // Marcar seleção em andamento
       selectionLockRef.current = true;
 
       const targetConversation = conversationId ? findConversationByAnyId(conversationId) : null;
-      const canonicalConversationId = targetConversation?.uuid || targetConversation?.id || conversationId;
+      // Prefer primary key: message.conversation_id and the messages cache are
+      // keyed by id. Using uuid here made the thread look empty after uuid
+      // started appearing on the list payload.
+      const canonicalConversationId = targetConversation?.id || targetConversation?.uuid || conversationId;
 
       dispatch({ type: 'SELECT_CONVERSATION', payload: canonicalConversationId });
 
@@ -303,6 +306,8 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
       setTimeout(() => {
         selectionLockRef.current = false;
       }, 50);
+
+      return canonicalConversationId ? String(canonicalConversationId) : null;
     },
     [findConversationByAnyId, loadSpecificConversation],
   );

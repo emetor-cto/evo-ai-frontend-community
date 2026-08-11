@@ -881,22 +881,17 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
   const getMessages = useCallback(
     (conversationId: string) => {
       const messages = state.messages[conversationId] || [];
+      const conversationIdStr = String(conversationId);
 
-      // 🔒 CRITICAL: Verificar se todas as mensagens pertencem à conversa atual
-      // 🔧 CORREÇÃO: Comparar como strings (UUIDs são strings)
-      const validMessages = messages.filter(
-        msg => String(msg.conversation_id) === String(conversationId),
-      );
+      // message.conversation_id is the PK. The cache key may be id or uuid,
+      // so keep messages that match either the lookup key or their own
+      // conversation_id (same bucket = same thread).
+      const validMessages = messages.filter(msg => {
+        const msgConvId = String(msg.conversation_id || '');
+        return !msgConvId || msgConvId === conversationIdStr;
+      });
 
-      // Se nem todas as mensagens são válidas, logar warning mas retornar válidas
-      if (messages.length > 0 && validMessages.length !== messages.length) {
-        return [];
-      }
-
-      // 🔧 GARANTIR ORDENAÇÃO: por timestamp (mensagens em envio sempre por último)
-      const sortedMessages = [...validMessages].sort(compareMessagesByTimestamp);
-
-      return sortedMessages;
+      return [...validMessages].sort(compareMessagesByTimestamp);
     },
     [state.messages],
   );

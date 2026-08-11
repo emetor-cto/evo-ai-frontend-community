@@ -103,7 +103,14 @@ function useChatIntegration() {
   // Computed values
   const selectedConversation = conversations.selectedConversation;
   const selectedMessages = selectedConversation
-    ? messages.getMessages(selectedConversation.id)
+    ? (() => {
+        const byId = messages.getMessages(String(selectedConversation.id));
+        if (byId.length > 0) return byId;
+        if (selectedConversation.uuid) {
+          return messages.getMessages(String(selectedConversation.uuid));
+        }
+        return byId;
+      })()
     : [];
   // 🔧 FIX: Ordenar conversas por last_activity_at para garantir ordem correta em tempo real
   const filteredConversations = useMemo(() => {
@@ -579,12 +586,9 @@ function useChatIntegration() {
 
   const selectConversationAndLoadMessages = useCallback(
     async (conversationId: string | null) => {
-      // Selecionar conversa (passa accountId para marcar como lida)
-      await conversations.selectConversation(conversationId);
-
-      // Carregar mensagens se há conversa selecionada
-      if (conversationId) {
-        await messages.loadMessages(conversationId);
+      const selectedId = await conversations.selectConversation(conversationId);
+      if (selectedId) {
+        await messages.loadMessages(String(selectedId));
       }
     },
     [conversations, messages],
