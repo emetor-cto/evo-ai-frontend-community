@@ -752,7 +752,7 @@
       "documents": "Documentos",
       "media": "Fotos e Vídeos",
       "conversationNote": "Notas da Conversa",
-      "schedule": "Agendar"
+      "createTask": "Criar tarefa"
     },
     "macros": {
       "tooltip": "Macros",

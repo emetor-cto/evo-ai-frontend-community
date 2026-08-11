@@ -749,7 +749,7 @@
       "documents": "Documents",
       "media": "Photos et Vidéos",
       "conversationNote": "Notes de la Conversation",
-      "schedule": "Planifier"
+      "createTask": "Créer une tâche"
     },
     "macros": {
       "tooltip": "Macros",

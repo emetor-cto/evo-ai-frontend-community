@@ -99,6 +99,25 @@ class PipelineTasksService {
     return extractData<PipelineTaskStatistics>(response);
   }
 
+  // Create a task for a conversation's active pipeline card
+  async createTaskForConversation(payload: {
+    conversation_id: string;
+    title: string;
+    description?: string;
+    task_type?: string;
+    priority?: string;
+    assigned_to_id?: string;
+    due_in?: string;
+  }): Promise<{
+    created: boolean;
+    skipped?: boolean;
+    reason?: string;
+    task_id?: string;
+  }> {
+    const response = await api.post('/pipeline_tasks/for_conversation', payload);
+    return extractData(response);
+  }
+
   // Add subtask to a parent task
   async addSubtask(
     pipelineId: string,

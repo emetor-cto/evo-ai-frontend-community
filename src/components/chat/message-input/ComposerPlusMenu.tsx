@@ -5,7 +5,7 @@ import {
   FileText,
   Image,
   StickyNote,
-  CalendarClock,
+  ListTodo,
   LayoutTemplate,
 } from 'lucide-react';
 
@@ -17,7 +17,7 @@ interface ComposerPlusMenuProps {
   onPickDocuments: () => void;
   onPickMedia: () => void;
   onOpenConversationNote: () => void;
-  onSchedule: () => void;
+  onCreateTask: () => void;
   /** WhatsApp Cloud templates — sem equivalente no protótipo, mantido como 6º item quando disponível. */
   onOpenTemplates?: () => void;
 }
@@ -29,7 +29,7 @@ const ITEM_ICON_BOX =
  * Menu "+" do composer — popover custom (não Dropdown genérico), estilo/cores
  * exatos do protótipo de referência (Melhorias CRM Chat §3.8): abre pra cima,
  * cada item com ícone em quadrado verde-claro 34x34. Ordem fixa: Mensagens
- * Rápidas, Documentos, Fotos e Vídeos, Notas da Conversa, Agendar.
+ * Rápidas, Documentos, Fotos e Vídeos, Notas da Conversa, Criar tarefa.
  */
 const ComposerPlusMenu: React.FC<ComposerPlusMenuProps> = ({
   disabled = false,
@@ -37,7 +37,7 @@ const ComposerPlusMenu: React.FC<ComposerPlusMenuProps> = ({
   onPickDocuments,
   onPickMedia,
   onOpenConversationNote,
-  onSchedule,
+  onCreateTask,
   onOpenTemplates,
 }) => {
   const { t } = useLanguage('chat');
@@ -88,10 +88,10 @@ const ComposerPlusMenu: React.FC<ComposerPlusMenuProps> = ({
       onClick: onOpenConversationNote,
     },
     {
-      key: 'agendar',
-      label: t('messageInput.composerMenu.schedule'),
-      icon: <CalendarClock className="h-4 w-4" />,
-      onClick: onSchedule,
+      key: 'tarefa',
+      label: t('messageInput.composerMenu.createTask'),
+      icon: <ListTodo className="h-4 w-4" />,
+      onClick: onCreateTask,
     },
     ...(onOpenTemplates
       ? [

@@ -777,11 +777,16 @@
       "documents": "Documentos",
       "media": "Fotos e Vídeos",
       "conversationNote": "Notas da Conversa",
-      "schedule": "Agendar"
+      "createTask": "Criar tarefa"
     },
     "macros": {
       "tooltip": "Macros",
       "subtitle": "Executar automações"
+    },
+    "createTask": {
+      "success": "Tarefa criada com sucesso",
+      "error": "Não foi possível criar a tarefa",
+      "noPipeline": "Adicione a conversa a um pipeline antes de criar a tarefa."
     },
     "schedule": {
       "title": "Agendar mensagem",

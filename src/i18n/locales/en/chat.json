@@ -774,11 +774,16 @@
       "documents": "Documents",
       "media": "Photos and Videos",
       "conversationNote": "Conversation Notes",
-      "schedule": "Schedule"
+      "createTask": "Create task"
     },
     "macros": {
       "tooltip": "Macros",
       "subtitle": "Run automations"
+    },
+    "createTask": {
+      "success": "Task created successfully",
+      "error": "Could not create the task",
+      "noPipeline": "Add the conversation to a pipeline before creating a task."
     },
     "schedule": {
       "title": "Schedule message",

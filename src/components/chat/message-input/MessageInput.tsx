@@ -30,9 +30,13 @@ import FilePreview from './FilePreview';
 import EmojiPicker from './EmojiPicker';
 import ComposerPlusMenu from './ComposerPlusMenu';
 import MacrosButton from './MacrosButton';
-import ScheduleMessageModal from './ScheduleMessageModal';
 import NoteComposer from './NoteComposer';
 import AudioRecorder from '../audio';
+import CreateTaskModal from '@/components/pipelines/tasks/CreateTaskModal';
+import { pipelineTasksService } from '@/services/pipelines/pipelineTasksService';
+import { usersService } from '@/services/users';
+import type { CreateTaskData } from '@/types/analytics';
+import type { User } from '@/types/users';
 
 import { AIAssistanceButton } from '../ai-assistance';
 import { CannedResponsesList } from '../canned-responses';
@@ -312,7 +316,9 @@ const MessageInput: React.FC<MessageInputProps> = ({
   );
 
   const [showTemplatesModal, setShowTemplatesModal] = useState(false);
-  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
+  const [taskUsers, setTaskUsers] = useState<User[]>([]);
+  const [creatingTask, setCreatingTask] = useState(false);
 
   // Notas da Conversa (§3.4) — a faixa SUBSTITUI a barra normal do composer
   // (não é modal); salvar envia como mensagem privada (mesmo pipeline de
@@ -724,7 +730,13 @@ const MessageInput: React.FC<MessageInputProps> = ({
               }
               onPickMedia={() => document.getElementById('composer-file-input-media')?.click()}
               onOpenConversationNote={() => setNotesMode(true)}
-              onSchedule={() => setShowScheduleModal(true)}
+              onCreateTask={() => {
+                setShowCreateTaskModal(true);
+                void usersService
+                  .getUsers({ per_page: 100 })
+                  .then(res => setTaskUsers(res.data || []))
+                  .catch(() => setTaskUsers([]));
+              }}
               onOpenTemplates={isWhatsApp ? handleTemplateClick : undefined}
             />
 
@@ -917,14 +929,46 @@ const MessageInput: React.FC<MessageInputProps> = ({
         onSend={handleSendTemplate}
       />
 
-      {/* Schedule Message Modal */}
+      {/* Create Task Modal — replaces schedule in the composer "+" menu */}
       {conversationId && (
-        <ScheduleMessageModal
-          isOpen={showScheduleModal}
-          onClose={() => setShowScheduleModal(false)}
-          conversationId={conversationId}
-          channelType={channelType}
-          messageContent={currentEditorMessage}
+        <CreateTaskModal
+          open={showCreateTaskModal}
+          onOpenChange={setShowCreateTaskModal}
+          availableUsers={taskUsers}
+          loading={creatingTask}
+          onSubmit={async (data: CreateTaskData) => {
+            setCreatingTask(true);
+            try {
+              const result = await pipelineTasksService.createTaskForConversation({
+                conversation_id: String(conversationId),
+                title: data.title,
+                description: data.description,
+                task_type: data.task_type,
+                priority: data.priority,
+                assigned_to_id: data.assigned_to_id || undefined,
+                due_in: data.due_date || undefined,
+              });
+              if (result.skipped) {
+                toast.error(
+                  t(
+                    'messageInput.createTask.noPipeline',
+                    'Adicione a conversa a um pipeline antes de criar a tarefa.',
+                  ),
+                );
+                return;
+              }
+              toast.success(
+                t('messageInput.createTask.success', 'Tarefa criada com sucesso'),
+              );
+              setShowCreateTaskModal(false);
+            } catch (error) {
+              console.error(error);
+              toast.error(t('messageInput.createTask.error', 'Não foi possível criar a tarefa'));
+              throw error;
+            } finally {
+              setCreatingTask(false);
+            }
+          }}
         />
       )}
     </>
