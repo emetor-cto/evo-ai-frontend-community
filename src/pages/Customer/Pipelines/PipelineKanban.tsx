@@ -65,7 +65,7 @@ import ReorderStagesModal from '@/components/pipelines/ReorderStagesModal';
 import PipelineContactModal from '@/components/pipelines/PipelineContactModal';
 import { ScheduleActionModal } from '@/components/scheduledActions';
 
-const KANBAN_PAGE_SIZE = 30;
+const KANBAN_PAGE_SIZE = 10;
 
 type StagePaginationState = {
   page: number;
