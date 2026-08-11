@@ -29,6 +29,8 @@ import {
   ShieldCheck,
   FileText,
   BookOpen,
+  Calculator,
+  ListTodo,
 } from 'lucide-react';
 
 export interface MenuItem {
@@ -115,6 +117,45 @@ export const getCustomerMenuItems = (t: (key: string) => string): MenuItem[] => 
     icon: Package,
     resource: 'products',
     action: 'read',
+  },
+  {
+    name: t('menu.customer.tasks'),
+    href: '/tasks',
+    icon: ListTodo,
+    resource: 'pipelines',
+    action: 'read',
+  },
+  {
+    name: t('menu.customer.salesTools'),
+    href: '/sales-tools',
+    icon: Calculator,
+    subItems: [
+      {
+        name: t('menu.salesTools.hub'),
+        href: '/sales-tools',
+        icon: Calculator,
+      },
+      {
+        name: t('menu.salesTools.conversion'),
+        href: '/sales-tools/conversion-calculator',
+        icon: Calculator,
+      },
+      {
+        name: t('menu.salesTools.commissioning'),
+        href: '/sales-tools/commissioning',
+        icon: Calculator,
+      },
+      {
+        name: t('menu.salesTools.forecast'),
+        href: '/sales-tools/sales-forecast',
+        icon: Calculator,
+      },
+      {
+        name: t('menu.salesTools.prospecting'),
+        href: '/sales-tools/weekly-prospecting',
+        icon: Calculator,
+      },
+    ],
   },
   {
     name: t('menu.customer.notebook'),

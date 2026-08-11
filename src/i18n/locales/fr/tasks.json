@@ -1,0 +1,57 @@
+{
+  "page": {
+    "title": "Tasks",
+    "subtitle": "List and filter all pipeline tasks"
+  },
+  "filters": {
+    "searchPlaceholder": "Search by title or description...",
+    "status": "Status",
+    "statusAll": "All statuses",
+    "statusOpen": "Open",
+    "type": "Type",
+    "typeAll": "All types",
+    "priority": "Priority",
+    "priorityAll": "All priorities",
+    "pipeline": "Pipeline",
+    "pipelineAll": "All pipelines",
+    "assignee": "Assignee",
+    "assigneeAll": "Anyone",
+    "due": "Due",
+    "dueAll": "Any date",
+    "dueToday": "Today",
+    "dueWeek": "This week",
+    "pastDue": "Overdue",
+    "clear": "Clear filters"
+  },
+  "table": {
+    "empty": "No tasks match these filters",
+    "columns": {
+      "title": "Task",
+      "status": "Status",
+      "type": "Type",
+      "priority": "Priority",
+      "due": "Due",
+      "assignee": "Assignee",
+      "pipeline": "Pipeline",
+      "contact": "Contact",
+      "actions": "Actions"
+    }
+  },
+  "actions": {
+    "complete": "Complete",
+    "reopen": "Reopen",
+    "openCard": "Open in pipeline"
+  },
+  "pagination": {
+    "summary": "Page {{page}} of {{totalPages}} · {{totalCount}} tasks",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "messages": {
+    "loadError": "Could not load tasks",
+    "completeSuccess": "Task completed",
+    "completeError": "Failed to complete task",
+    "reopenSuccess": "Task reopened",
+    "reopenError": "Failed to reopen task"
+  }
+}

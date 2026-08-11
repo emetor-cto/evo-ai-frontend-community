@@ -1,0 +1,57 @@
+{
+  "page": {
+    "title": "Tarefas",
+    "subtitle": "Liste e filtre todas as tarefas dos pipelines"
+  },
+  "filters": {
+    "searchPlaceholder": "Buscar por título ou descrição...",
+    "status": "Status",
+    "statusAll": "Todos os status",
+    "statusOpen": "Abertas",
+    "type": "Tipo",
+    "typeAll": "Todos os tipos",
+    "priority": "Prioridade",
+    "priorityAll": "Todas as prioridades",
+    "pipeline": "Pipeline",
+    "pipelineAll": "Todos os pipelines",
+    "assignee": "Responsável",
+    "assigneeAll": "Todos",
+    "due": "Vencimento",
+    "dueAll": "Qualquer data",
+    "dueToday": "Hoje",
+    "dueWeek": "Esta semana",
+    "pastDue": "Atrasadas",
+    "clear": "Limpar filtros"
+  },
+  "table": {
+    "empty": "Nenhuma tarefa encontrada com esses filtros",
+    "columns": {
+      "title": "Tarefa",
+      "status": "Status",
+      "type": "Tipo",
+      "priority": "Prioridade",
+      "due": "Vencimento",
+      "assignee": "Responsável",
+      "pipeline": "Pipeline",
+      "contact": "Contato",
+      "actions": "Ações"
+    }
+  },
+  "actions": {
+    "complete": "Concluir",
+    "reopen": "Reabrir",
+    "openCard": "Abrir no pipeline"
+  },
+  "pagination": {
+    "summary": "Página {{page}} de {{totalPages}} · {{totalCount}} tarefas",
+    "previous": "Anterior",
+    "next": "Próxima"
+  },
+  "messages": {
+    "loadError": "Não foi possível carregar as tarefas",
+    "completeSuccess": "Tarefa concluída",
+    "completeError": "Falha ao concluir a tarefa",
+    "reopenSuccess": "Tarefa reaberta",
+    "reopenError": "Falha ao reabrir a tarefa"
+  }
+}

@@ -12,6 +12,11 @@ import {
   DropdownMenuTrigger,
   Badge,
   Input,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from '@evoapi/design-system';
 import { Popover, PopoverContent, PopoverTrigger } from '@evoapi/design-system/popover';
 import {
@@ -169,8 +174,8 @@ export default function PipelineKanban() {
     null,
   );
 
-  // Reminders popover (Lembrete next to date range)
-  const [reminderPopoverOpen, setReminderPopoverOpen] = useState(false);
+  // Reminders panel (full dialog — Hoje / Próximos 7 dias)
+  const [reminderPanelOpen, setReminderPanelOpen] = useState(false);
   const [reminderPeriod, setReminderPeriod] = useState<'today' | 'upcoming'>('today');
   const [remindersLoading, setRemindersLoading] = useState(false);
   const [reminderTasks, setReminderTasks] = useState<
@@ -607,10 +612,32 @@ export default function PipelineKanban() {
   );
 
   useEffect(() => {
-    if (!reminderPopoverOpen || !pipelineId) return;
-    const period = reminderFilter === 'upcoming' ? 'upcoming' : reminderPeriod;
+    if (!reminderPanelOpen || !pipelineId) return;
+    const period = (reminderFilter as 'today' | 'upcoming') || reminderPeriod;
     void loadReminders(period);
-  }, [reminderPopoverOpen, pipelineId, reminderPeriod, reminderFilter, loadReminders]);
+  }, [reminderPanelOpen, pipelineId, reminderPeriod, reminderFilter, loadReminders]);
+
+  const openReminderPanel = useCallback(
+    (period?: 'today' | 'upcoming') => {
+      const next =
+        period ||
+        (reminderFilter === 'upcoming' || reminderFilter === 'today'
+          ? reminderFilter
+          : reminderPeriod);
+      setReminderPeriod(next);
+      setReminderPanelOpen(true);
+    },
+    [reminderFilter, reminderPeriod],
+  );
+
+  const selectReminderPeriod = useCallback(
+    (period: 'today' | 'upcoming') => {
+      setReminderPeriod(period);
+      updateFilters({ reminder: period });
+      void loadReminders(period);
+    },
+    [loadReminders, updateFilters],
+  );
 
   const handleSearchChange = useCallback((value: string) => {
     setSearchInput(value);
@@ -1284,175 +1311,40 @@ export default function PipelineKanban() {
                   </PopoverContent>
                 </Popover>
 
-                {/* Reminder filter — tasks/schedules due today or upcoming */}
-                <Popover
-                  open={reminderPopoverOpen}
-                  onOpenChange={open => {
-                    setReminderPopoverOpen(open);
-                    if (open && !reminderFilter) setReminderPeriod('today');
-                    if (open && reminderFilter === 'upcoming') setReminderPeriod('upcoming');
-                    if (open && reminderFilter === 'today') setReminderPeriod('today');
-                  }}
-                >
-                  <PopoverTrigger asChild>
-                    {reminderFilter ? (
-                      <div className="flex items-center gap-1.5 h-9 px-3 rounded-md border bg-secondary text-secondary-foreground text-sm font-medium cursor-pointer select-none hover:bg-secondary/80 transition-colors">
-                        <Bell className="w-4 h-4 flex-shrink-0" />
-                        <span className="max-w-32 truncate">
-                          {reminderFilter === 'upcoming'
-                            ? t('kanban.search.reminderUpcoming', 'Próximos')
-                            : t('kanban.search.reminderToday', 'Hoje')}
-                        </span>
-                        <button
-                          className="ml-0.5 text-secondary-foreground/60 hover:text-secondary-foreground transition-colors"
-                          onClick={e => {
-                            e.stopPropagation();
-                            updateFilters({ reminder: undefined });
-                          }}
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <Button variant="outline" size="sm" className="h-9 gap-2 whitespace-nowrap">
-                        <Bell className="w-4 h-4" />
-                        {t('kanban.search.reminderFilter', 'Lembrete')}
-                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-                      </Button>
-                    )}
-                  </PopoverTrigger>
-                  <PopoverContent align="start" className="w-80 p-3 space-y-3">
-                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                      {t('kanban.search.reminderFilter', 'Lembrete')}
-                    </div>
-                    <div className="flex gap-1">
-                      {(['today', 'upcoming'] as const).map(period => (
-                        <Button
-                          key={period}
-                          type="button"
-                          size="sm"
-                          variant={
-                            (reminderFilter || reminderPeriod) === period ? 'default' : 'outline'
-                          }
-                          className="flex-1 h-8"
-                          onClick={() => {
-                            setReminderPeriod(period);
-                            updateFilters({ reminder: period });
-                            void loadReminders(period);
-                          }}
-                        >
-                          {period === 'today'
-                            ? t('kanban.search.reminderToday', 'Hoje')
-                            : t('kanban.search.reminderUpcoming', 'Próximos')}
-                        </Button>
-                      ))}
-                    </div>
-                    <div className="max-h-64 overflow-y-auto space-y-2">
-                      {remindersLoading ? (
-                        <p className="text-sm text-muted-foreground py-4 text-center">
-                          {t('kanban.search.reminderLoading', 'Carregando...')}
-                        </p>
-                      ) : reminderTasks.length === 0 && reminderSchedules.length === 0 ? (
-                        <p className="text-sm text-muted-foreground py-4 text-center">
-                          {t('kanban.search.reminderEmpty', 'Nenhum lembrete neste período')}
-                        </p>
-                      ) : (
-                        <>
-                          {reminderTasks.map(task => {
-                            const contact =
-                              task.pipeline_item?.contact ||
-                              task.pipeline_item?.conversation?.contact;
-                            const contactId =
-                              contact?.id || task.pipeline_item?.contact_id || null;
-                            const conversationId =
-                              task.pipeline_item?.conversation?.id ||
-                              task.pipeline_item?.conversation_id ||
-                              null;
-                            return (
-                              <button
-                                key={`task-${task.id}`}
-                                type="button"
-                                className="w-full text-left rounded-md border border-border p-2 hover:bg-muted/50 transition-colors"
-                                onClick={() => {
-                                  if (!contactId) return;
-                                  setContactModalContactId(String(contactId));
-                                  setContactModalConversationId(
-                                    conversationId ? String(conversationId) : null,
-                                  );
-                                  setContactModalConversationUuid(
-                                    task.pipeline_item?.conversation?.uuid
-                                      ? String(task.pipeline_item.conversation.uuid)
-                                      : null,
-                                  );
-                                  setContactModalOpen(true);
-                                  setReminderPopoverOpen(false);
-                                }}
-                              >
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-0.5">
-                                  <ListTodo className="w-3 h-3" />
-                                  <span>{t('kanban.search.reminderTask', 'Tarefa')}</span>
-                                </div>
-                                <p className="text-sm font-medium truncate">
-                                  {task.title || t('kanban.search.reminderUntitled', 'Sem título')}
-                                </p>
-                                <p className="text-xs text-muted-foreground truncate">
-                                  {contact?.name || '—'}
-                                  {task.due_date
-                                    ? ` · ${new Date(task.due_date).toLocaleString('pt-BR', {
-                                        day: '2-digit',
-                                        month: '2-digit',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                      })}`
-                                    : ''}
-                                </p>
-                              </button>
-                            );
-                          })}
-                          {reminderSchedules.map(sa => (
-                            <button
-                              key={`sa-${sa.id}`}
-                              type="button"
-                              className="w-full text-left rounded-md border border-border p-2 hover:bg-muted/50 transition-colors"
-                              onClick={() => {
-                                const contactId = sa.contact?.id || sa.contact_id;
-                                if (!contactId) return;
-                                setContactModalContactId(String(contactId));
-                                setContactModalConversationId(
-                                  sa.conversation_id ? String(sa.conversation_id) : null,
-                                );
-                                setContactModalConversationUuid(null);
-                                setContactModalOpen(true);
-                                setReminderPopoverOpen(false);
-                              }}
-                            >
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-0.5">
-                                <CalendarClock className="w-3 h-3" />
-                                <span>{t('kanban.search.reminderSchedule', 'Agendamento')}</span>
-                              </div>
-                              <p className="text-sm font-medium truncate">
-                                {sa.title ||
-                                  sa.action_type ||
-                                  t('kanban.search.reminderUntitled', 'Sem título')}
-                              </p>
-                              <p className="text-xs text-muted-foreground truncate">
-                                {sa.contact?.name || '—'}
-                                {sa.scheduled_for
-                                  ? ` · ${new Date(sa.scheduled_for).toLocaleString('pt-BR', {
-                                      day: '2-digit',
-                                      month: '2-digit',
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })}`
-                                  : ''}
-                              </p>
-                            </button>
-                          ))}
-                        </>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                {/* Reminder panel — tasks/schedules due today or next 7 days */}
+                {reminderFilter ? (
+                  <div className="flex items-center gap-1.5 h-9 px-3 rounded-md border bg-secondary text-secondary-foreground text-sm font-medium select-none">
+                    <button
+                      type="button"
+                      className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+                      onClick={() => openReminderPanel(reminderFilter)}
+                    >
+                      <Bell className="w-4 h-4 flex-shrink-0" />
+                      <span className="max-w-32 truncate">
+                        {reminderFilter === 'upcoming'
+                          ? t('kanban.search.reminderUpcoming', 'Próximos 7 dias')
+                          : t('kanban.search.reminderToday', 'Hoje')}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      className="ml-0.5 text-secondary-foreground/60 hover:text-secondary-foreground transition-colors"
+                      onClick={() => updateFilters({ reminder: undefined })}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 gap-2 whitespace-nowrap"
+                    onClick={() => openReminderPanel()}
+                  >
+                    <Bell className="w-4 h-4" />
+                    {t('kanban.search.reminderFilter', 'Lembrete')}
+                  </Button>
+                )}
 
                 {/* Label filter — only shown when pipeline items have labels */}
                 {uniqueLabels.length > 0 && (
@@ -1556,10 +1448,16 @@ export default function PipelineKanban() {
                   )}
                   {reminderFilter && (
                     <span className="inline-flex items-center gap-1.5 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
-                      <Bell className="w-3 h-3" />
-                      {reminderFilter === 'upcoming'
-                        ? t('kanban.search.reminderUpcoming', 'Próximos')
-                        : t('kanban.search.reminderToday', 'Hoje')}
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 hover:opacity-80"
+                        onClick={() => openReminderPanel(reminderFilter)}
+                      >
+                        <Bell className="w-3 h-3" />
+                        {reminderFilter === 'upcoming'
+                          ? t('kanban.search.reminderUpcoming', 'Próximos 7 dias')
+                          : t('kanban.search.reminderToday', 'Hoje')}
+                      </button>
                       <button
                         onClick={() => updateFilters({ reminder: undefined })}
                         className="hover:text-primary/60 transition-colors"
@@ -2207,6 +2105,143 @@ export default function PipelineKanban() {
           contactId={scheduleActionContactId}
         />
       )}
+
+      <Dialog open={reminderPanelOpen} onOpenChange={setReminderPanelOpen}>
+        <DialogContent className="!max-w-xl w-[min(92vw,36rem)] max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden">
+          <DialogHeader className="px-5 pt-5 pb-3 border-b shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              {t('kanban.search.reminderFilter', 'Lembrete')}
+            </DialogTitle>
+            <DialogDescription>
+              {t(
+                'kanban.search.reminderPanelDescription',
+                'Tarefas e agendamentos deste pipeline — hoje ou nos próximos 7 dias.',
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="px-5 pt-3 pb-2 flex gap-1 shrink-0">
+            {(['today', 'upcoming'] as const).map(period => (
+              <Button
+                key={period}
+                type="button"
+                size="sm"
+                variant={(reminderFilter || reminderPeriod) === period ? 'default' : 'outline'}
+                className="flex-1 h-9"
+                onClick={() => selectReminderPeriod(period)}
+              >
+                {period === 'today'
+                  ? t('kanban.search.reminderToday', 'Hoje')
+                  : t('kanban.search.reminderUpcoming', 'Próximos 7 dias')}
+              </Button>
+            ))}
+          </div>
+
+          <div className="px-5 pb-5 overflow-y-auto flex-1 min-h-0 space-y-2">
+            {remindersLoading ? (
+              <p className="text-sm text-muted-foreground py-10 text-center">
+                {t('kanban.search.reminderLoading', 'Carregando...')}
+              </p>
+            ) : reminderTasks.length === 0 && reminderSchedules.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-10 text-center">
+                {t('kanban.search.reminderEmpty', 'Nenhum lembrete neste período')}
+              </p>
+            ) : (
+              <>
+                {reminderTasks.map(task => {
+                  const contact =
+                    task.pipeline_item?.contact || task.pipeline_item?.conversation?.contact;
+                  const contactId = contact?.id || task.pipeline_item?.contact_id || null;
+                  const conversationId =
+                    task.pipeline_item?.conversation?.id ||
+                    task.pipeline_item?.conversation_id ||
+                    null;
+                  return (
+                    <button
+                      key={`task-${task.id}`}
+                      type="button"
+                      className="w-full text-left rounded-lg border border-border p-3 hover:bg-muted/50 transition-colors"
+                      onClick={() => {
+                        if (!contactId) return;
+                        setContactModalContactId(String(contactId));
+                        setContactModalConversationId(
+                          conversationId ? String(conversationId) : null,
+                        );
+                        setContactModalConversationUuid(
+                          task.pipeline_item?.conversation?.uuid
+                            ? String(task.pipeline_item.conversation.uuid)
+                            : null,
+                        );
+                        setContactModalOpen(true);
+                        setReminderPanelOpen(false);
+                      }}
+                    >
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                        <ListTodo className="w-3.5 h-3.5" />
+                        <span>{t('kanban.search.reminderTask', 'Tarefa')}</span>
+                      </div>
+                      <p className="text-sm font-medium truncate">
+                        {task.title || t('kanban.search.reminderUntitled', 'Sem título')}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">
+                        {contact?.name || '—'}
+                        {task.due_date
+                          ? ` · ${new Date(task.due_date).toLocaleString('pt-BR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}`
+                          : ''}
+                      </p>
+                    </button>
+                  );
+                })}
+                {reminderSchedules.map(sa => (
+                  <button
+                    key={`sa-${sa.id}`}
+                    type="button"
+                    className="w-full text-left rounded-lg border border-border p-3 hover:bg-muted/50 transition-colors"
+                    onClick={() => {
+                      const contactId = sa.contact?.id || sa.contact_id;
+                      if (!contactId) return;
+                      setContactModalContactId(String(contactId));
+                      setContactModalConversationId(
+                        sa.conversation_id ? String(sa.conversation_id) : null,
+                      );
+                      setContactModalConversationUuid(null);
+                      setContactModalOpen(true);
+                      setReminderPanelOpen(false);
+                    }}
+                  >
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                      <CalendarClock className="w-3.5 h-3.5" />
+                      <span>{t('kanban.search.reminderSchedule', 'Agendamento')}</span>
+                    </div>
+                    <p className="text-sm font-medium truncate">
+                      {sa.title ||
+                        sa.action_type ||
+                        t('kanban.search.reminderUntitled', 'Sem título')}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">
+                      {sa.contact?.name || '—'}
+                      {sa.scheduled_for
+                        ? ` · ${new Date(sa.scheduled_for).toLocaleString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}`
+                        : ''}
+                    </p>
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <PipelineContactModal
         open={contactModalOpen}

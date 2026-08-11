@@ -12,6 +12,12 @@ import type {
 } from '@/types/analytics';
 
 class PipelineTasksService {
+  // Global account-wide task list (paginated)
+  async getTasks(params?: PipelineTasksListParams): Promise<PipelineTasksResponse> {
+    const response = await api.get('/pipeline_tasks', { params });
+    return extractResponse<PipelineTask>(response) as PipelineTasksResponse;
+  }
+
   // Get tasks for a pipeline item
   async getTasksForItem(
     pipelineId: string,

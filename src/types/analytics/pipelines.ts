@@ -390,6 +390,8 @@ export interface PipelineTask {
   };
   subtasks?: PipelineTask[]; // Recursive
   pipeline_item?: Partial<PipelineItem>;
+  pipeline?: { id: string; name?: string };
+  pipeline_stage?: { id: string; name?: string };
 }
 
 export interface CreateTaskData {
@@ -434,6 +436,10 @@ export interface PipelineTasksListParams {
   due_today?: boolean;
   due_this_week?: boolean;
   past_due?: boolean;
+  pipeline_id?: string;
+  q?: string;
+  open?: boolean;
+  hierarchy?: 'all' | 'root';
   page?: number;
   per_page?: number;
 }
