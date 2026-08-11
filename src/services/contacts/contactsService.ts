@@ -243,7 +243,15 @@ class ContactsService {
     const response = await api.get(`/contacts/${contactId}/conversations`, {
       params,
     });
-    return extractResponse<ContactConversation>(response) as ContactConversationsResponse;
+    const extracted = extractResponse<ContactConversation>(response) as ContactConversationsResponse;
+    const payload = response.data?.payload;
+    if ((!extracted.data || extracted.data.length === 0) && Array.isArray(payload)) {
+      return { ...extracted, data: payload };
+    }
+    if (!Array.isArray(extracted.data) && Array.isArray(response.data)) {
+      return { ...extracted, data: response.data };
+    }
+    return extracted;
   }
 
   // Contact Pipelines

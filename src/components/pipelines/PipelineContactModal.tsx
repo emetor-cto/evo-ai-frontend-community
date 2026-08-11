@@ -30,7 +30,8 @@ import { contactsService } from '@/services/contacts/contactsService';
 import { scheduledActionsService } from '@/services/scheduledActions/scheduledActionsService';
 import { pipelineTasksService } from '@/services/pipelines/pipelineTasksService';
 import { chatService } from '@/services/chat/chatService';
-import type { Contact } from '@/types/contacts';
+import { conversationAPI } from '@/services/conversations/conversationService';
+import type { Contact, ContactableInboxes } from '@/types/contacts';
 import type { PipelineTask } from '@/types/analytics';
 import type { ScheduledAction } from '@/types/automation';
 
@@ -57,6 +58,24 @@ type NegotiationRow = {
     total_value?: number;
   };
 };
+
+function activityTimestamp(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value < 1e12 ? value * 1000 : value;
+  }
+  const parsed = Date.parse(String(value || ''));
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function pickWhatsappInbox(inboxes: ContactableInboxes[]): ContactableInboxes | null {
+  const available = inboxes.filter(
+    inbox => inbox.available !== false && inbox.can_create_conversation !== false,
+  );
+  const whatsapp = available.find(inbox =>
+    /whatsapp/i.test(`${inbox.channel_type || ''} ${inbox.channel?.provider || ''}`),
+  );
+  return whatsapp || available[0] || null;
+}
 
 function formatDateTime(value?: string | number | null) {
   if (value == null || value === '') return '—';
@@ -106,11 +125,9 @@ export default function PipelineContactModal({
       setSchedules(Array.isArray(schedulesData) ? schedulesData : []);
 
       const conversations = (conversationsData as { data?: Array<Record<string, unknown>> })?.data ?? [];
-      const sorted = [...conversations].sort((a, b) => {
-        const aAt = new Date(String(a.last_activity_at || 0)).getTime();
-        const bAt = new Date(String(b.last_activity_at || 0)).getTime();
-        return bAt - aAt;
-      });
+      const sorted = [...conversations].sort(
+        (a, b) => activityTimestamp(b.last_activity_at) - activityTimestamp(a.last_activity_at),
+      );
       const latest = sorted[0];
       setLastContactAt(
         latest?.last_activity_at
@@ -124,9 +141,11 @@ export default function PipelineContactModal({
         sorted.find(c => String(c.uuid || c.id) === conversationUuid) ||
         sorted.find(c => String(c.id) === conversationId) ||
         latest;
-      setActiveConversationId(preferred ? String(preferred.id) : null);
+      setActiveConversationId(
+        preferred ? String(preferred.id) : conversationId || conversationUuid || null,
+      );
       setActiveConversationUuid(
-        preferred ? String(preferred.uuid || preferred.id) : conversationUuid || null,
+        preferred ? String(preferred.uuid || preferred.id) : conversationUuid || conversationId || null,
       );
 
       // Load open tasks (pending + overdue) for each negotiation.
@@ -177,14 +196,41 @@ export default function PipelineContactModal({
 
   const handleSend = async () => {
     const content = message.trim();
-    if (!content) return;
-    if (!activeConversationId) {
-      toast.error(t('contactModal.noConversation', 'Este contato ainda não tem conversa'));
-      return;
-    }
+    if (!content || !contactId) return;
+
     setSending(true);
     try {
-      await chatService.sendMessage(activeConversationId, {
+      let targetId = activeConversationId;
+      if (!targetId) {
+        const inboxes = await contactsService.getContactableInboxes(contactId);
+        const inbox = pickWhatsappInbox(Array.isArray(inboxes) ? inboxes : []);
+        if (!inbox) {
+          toast.error(
+            t('contactModal.noInbox', 'Nenhum canal disponível para iniciar a conversa'),
+          );
+          return;
+        }
+
+        const created = await conversationAPI.create({
+          contact_id: contactId,
+          inbox_id: inbox.id,
+          ...(inbox.source_id ? { source_id: inbox.source_id } : {}),
+          message: { content },
+        });
+        const createdId = created?.id ? String(created.id) : null;
+        const createdUuid = created?.uuid ? String(created.uuid) : createdId;
+        if (!createdId) {
+          throw new Error('Conversation create returned no id');
+        }
+        setActiveConversationId(createdId);
+        setActiveConversationUuid(createdUuid);
+        toast.success(t('contactModal.messageSent', 'Mensagem enviada'));
+        setMessage('');
+        setLastContactAt(new Date().toISOString());
+        return;
+      }
+
+      await chatService.sendMessage(targetId, {
         content,
         message_type: 'outgoing',
         private: false,

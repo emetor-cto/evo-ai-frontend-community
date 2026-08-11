@@ -867,6 +867,7 @@
     "openConversation": "Abrir conversa",
     "openFromName": "Ver contato",
     "noConversation": "Este contato ainda não tem conversa",
+    "noInbox": "Nenhum canal disponível para iniciar a conversa",
     "messageSent": "Mensagem enviada",
     "messageError": "Falha ao enviar mensagem",
     "enteredAt": "Entrou",
