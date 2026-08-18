@@ -439,6 +439,7 @@ export interface PipelineTasksListParams {
   pipeline_id?: string;
   q?: string;
   open?: boolean;
+  upcoming?: boolean;
   hierarchy?: 'all' | 'root';
   page?: number;
   per_page?: number;

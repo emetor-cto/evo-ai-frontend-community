@@ -21,7 +21,8 @@
     "dueToday": "Today",
     "dueWeek": "This week",
     "pastDue": "Overdue",
-    "clear": "Clear filters"
+    "clear": "Clear filters",
+    "dueUpcoming": "Upcoming (future)"
   },
   "table": {
     "empty": "No tasks match these filters",
@@ -40,7 +41,8 @@
   "actions": {
     "complete": "Complete",
     "reopen": "Reopen",
-    "openCard": "Open in pipeline"
+    "openCard": "Open in pipeline",
+    "openConversation": "Abrir conversa em nova aba"
   },
   "pagination": {
     "summary": "Page {{page}} of {{totalPages}} · {{totalCount}} tasks",

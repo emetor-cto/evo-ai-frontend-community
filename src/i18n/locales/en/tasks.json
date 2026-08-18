@@ -19,6 +19,7 @@
     "due": "Due",
     "dueAll": "Any date",
     "dueToday": "Today",
+    "dueUpcoming": "Upcoming (future)",
     "dueWeek": "This week",
     "pastDue": "Overdue",
     "clear": "Clear filters"
@@ -40,7 +41,8 @@
   "actions": {
     "complete": "Complete",
     "reopen": "Reopen",
-    "openCard": "Open in pipeline"
+    "openCard": "Open in pipeline",
+    "openConversation": "Open conversation in new tab"
   },
   "pagination": {
     "summary": "Page {{page}} of {{totalPages}} · {{totalCount}} tasks",

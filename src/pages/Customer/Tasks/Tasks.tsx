@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  MessageSquare,
   RotateCcw,
   Search,
   SquareKanban,
@@ -28,7 +29,7 @@ import { DEFAULT_PAGE_SIZE } from '@/constants/pagination';
 import type { Pipeline, PipelineTask } from '@/types/analytics';
 
 type StatusFilter = 'open' | PipelineTask['status'] | 'all';
-type DueFilter = 'all' | 'today' | 'week' | 'past';
+type DueFilter = 'all' | 'today' | 'upcoming' | 'past';
 
 const TASK_TYPES: PipelineTask['task_type'][] = [
   'call',
@@ -56,6 +57,18 @@ function contactName(task: PipelineTask): string {
       }
     | undefined;
   return item?.contact?.name || item?.conversation?.contact?.name || '—';
+}
+
+function conversationPath(task: PipelineTask): string | null {
+  const item = task.pipeline_item;
+  if (!item) return null;
+
+  const conversationId =
+    item.conversation?.id ||
+    item.conversation_id ||
+    (item.type === 'conversation' ? item.item_id : null);
+
+  return conversationId ? `/conversations/${conversationId}` : null;
 }
 
 function formatDue(value?: string | null) {
@@ -132,7 +145,7 @@ export default function TasksPage() {
     if (pipelineFilter !== 'all') out.pipeline_id = pipelineFilter;
     if (assigneeFilter !== 'all') out.assigned_to_id = assigneeFilter;
     if (dueFilter === 'today') out.due_today = true;
-    if (dueFilter === 'week') out.due_this_week = true;
+    if (dueFilter === 'upcoming') out.upcoming = true;
     if (dueFilter === 'past') out.past_due = true;
     return out;
   }, [
@@ -353,7 +366,7 @@ export default function TasksPage() {
             <SelectContent>
               <SelectItem value="all">{t('filters.dueAll')}</SelectItem>
               <SelectItem value="today">{t('filters.dueToday')}</SelectItem>
-              <SelectItem value="week">{t('filters.dueWeek')}</SelectItem>
+              <SelectItem value="upcoming">{t('filters.dueUpcoming')}</SelectItem>
               <SelectItem value="past">{t('filters.pastDue')}</SelectItem>
             </SelectContent>
           </Select>
@@ -390,6 +403,7 @@ export default function TasksPage() {
             <tbody>
               {tasks.map(task => {
                 const pipelineId = task.pipeline?.id || task.pipeline_item?.pipeline_id;
+                const chatHref = conversationPath(task);
                 const isOpen = task.status === 'pending' || task.status === 'overdue';
                 return (
                   <tr key={task.id} className="border-t hover:bg-muted/30">
@@ -407,6 +421,19 @@ export default function TasksPage() {
                     <td className="px-3 py-2 max-w-[140px] truncate">{contactName(task)}</td>
                     <td className="px-3 py-2">
                       <div className="flex items-center justify-end gap-1">
+                        {chatHref && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2"
+                            title={t('actions.openConversation')}
+                            onClick={() =>
+                              window.open(chatHref, '_blank', 'noopener,noreferrer')
+                            }
+                          >
+                            <MessageSquare className="h-4 w-4" />
+                          </Button>
+                        )}
                         {pipelineId && (
                           <Button variant="ghost" size="sm" className="h-8 px-2" asChild>
                             <Link to={`/pipelines/${pipelineId}`} title={t('actions.openCard')}>

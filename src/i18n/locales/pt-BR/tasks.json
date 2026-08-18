@@ -19,6 +19,7 @@
     "due": "Vencimento",
     "dueAll": "Qualquer data",
     "dueToday": "Hoje",
+    "dueUpcoming": "Próximas (futuras)",
     "dueWeek": "Esta semana",
     "pastDue": "Atrasadas",
     "clear": "Limpar filtros"
@@ -40,7 +41,8 @@
   "actions": {
     "complete": "Concluir",
     "reopen": "Reabrir",
-    "openCard": "Abrir no pipeline"
+    "openCard": "Abrir no pipeline",
+    "openConversation": "Abrir conversa em nova aba"
   },
   "pagination": {
     "summary": "Página {{page}} de {{totalPages}} · {{totalCount}} tarefas",
