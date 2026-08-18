@@ -220,6 +220,8 @@ export interface PipelineStats {
 export interface PipelineItem {
   id: string;
   item_id: string; // conversation_id or contact_id
+  conversation_id?: string | null;
+  contact_id?: string | null;
   type: 'conversation' | 'contact';
   pipeline_id: string;
   stage_id: string;

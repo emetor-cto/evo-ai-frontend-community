@@ -66,7 +66,7 @@ function conversationPath(task: PipelineTask): string | null {
   const conversationId =
     item.conversation?.id ||
     item.conversation_id ||
-    (item.type === 'conversation' ? item.item_id : null);
+    (item.type === 'conversation' ? item.item_id : undefined);
 
   return conversationId ? `/conversations/${conversationId}` : null;
 }
