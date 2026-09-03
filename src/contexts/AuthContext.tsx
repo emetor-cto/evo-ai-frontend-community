@@ -146,7 +146,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userData = response.data.user;
       setUser(userData);
 
-      // Initialize app data after MFA
+      // Account only — route-specific CRM data loads via AppInitializer
       await useAppDataStore.getState().initializeAppData();
 
       setMfaState(null);

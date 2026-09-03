@@ -201,17 +201,22 @@ export const useAppDataStore = create<AppDataState>((set, get) => ({
     }
   },
 
+  // Bootstrap-only: account is enough to leave the splash screen.
+  // Route-specific data (inboxes/labels/teams/agents) is loaded by
+  // AppInitializer via initializeAppDataDeferred — never block auth on it.
   initializeAppData: async () => {
     set({ initialized: true });
-    await get().initializeAppDataDeferred();
+    await get().fetchAccount();
   },
 
   initializeAppDataDeferred: async (options = {}) => {
     const forceRefresh = options.forceRefresh ?? false;
-    const shouldLoadAgents = options.agents ?? true;
-    const shouldLoadInboxes = options.inboxes ?? true;
-    const shouldLoadLabels = options.labels ?? true;
-    const shouldLoadTeams = options.teams ?? true;
+    // Default false: callers must opt into each secondary dataset.
+    // (Previously defaulted true and blocked the auth splash when CRM hung.)
+    const shouldLoadAgents = options.agents ?? false;
+    const shouldLoadInboxes = options.inboxes ?? false;
+    const shouldLoadLabels = options.labels ?? false;
+    const shouldLoadTeams = options.teams ?? false;
 
     const tasks: Promise<void>[] = [];
     tasks.push(get().fetchAccount(forceRefresh));

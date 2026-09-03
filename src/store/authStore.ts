@@ -119,7 +119,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
           isFetching: false,
         });
 
-        // Initialize app data after successful validation
+        // Only wait for account (needed for locale/UI). Secondary CRM data
+        // (inboxes/labels/teams) must NOT block auth — if those hang, the
+        // splash screen would spin forever (see AppInitializer LoadingScreen).
         try {
           await useAppDataStore.getState().initializeAppData();
         } catch (error) {

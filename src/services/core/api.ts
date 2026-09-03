@@ -6,6 +6,7 @@ import { applySetupInterceptor } from '@/services/core/setupInterceptor';
 
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/api/v1`,
+  timeout: 45_000,
   headers: {
     'Content-Type': 'application/json',
   },
