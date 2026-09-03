@@ -340,12 +340,12 @@ const ChatArea = ({
         />
       )}
 
-      {/* Messages Area */}
-      {messages.isMessagesLoading(selectedConversationId) ? (
+      {/* Messages Area — skeleton only on cold load (no cache yet) */}
+      {messages.isMessagesLoading(selectedConversationId) && selectedMessages.length === 0 ? (
         <div className="p-4">
           <MessageSkeleton count={6} />
         </div>
-      ) : messages.getMessagesError(selectedConversationId) ? (
+      ) : messages.getMessagesError(selectedConversationId) && selectedMessages.length === 0 ? (
         <div className="p-4 text-center">
           <div className="text-destructive mb-2">{t('chatArea.errors.loadMessages')}</div>
           <p className="text-sm text-muted-foreground mb-4">

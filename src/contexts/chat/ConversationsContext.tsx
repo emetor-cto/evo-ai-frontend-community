@@ -261,45 +261,43 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
           }
         }
 
-        // 🎯 PERSISTIR: Marcar conversa como lida no backend
-        try {
-          await chatService.markConversationAsRead(canonicalConversationId);
-
-          // Atualizar estado local para garantir persistência
+        // Optimistic local unread clear, then persist in background (non-blocking).
+        // Chat.tsx no longer duplicates this call on selection change.
+        dispatch({
+          type: 'UPDATE_UNREAD_COUNT',
+          payload: { conversationId: canonicalConversationId, count: 0 },
+        });
+        if (conversationInList) {
           dispatch({
-            type: 'UPDATE_UNREAD_COUNT',
-            payload: { conversationId: canonicalConversationId, count: 0 },
+            type: 'UPDATE_CONVERSATION',
+            payload: { ...conversationInList, unread_count: 0 },
           });
-
-          // Também atualizar o objeto da conversa para manter sincronizado
-          const conversationInList = findConversationByAnyId(canonicalConversationId);
-          if (conversationInList) {
-            dispatch({
-              type: 'UPDATE_CONVERSATION',
-              payload: { ...conversationInList, unread_count: 0 },
-            });
-          }
-
-          // Salvar no localStorage que esta conversa foi marcada como lida
-          try {
-            const saved = localStorage.getItem('crm-chat-state');
-            const currentState = saved ? JSON.parse(saved) : {};
-            const readConversations = currentState.readConversations || {};
-            readConversations[canonicalConversationId] = true;
-            localStorage.setItem(
-              'crm-chat-state',
-              JSON.stringify({
-                ...currentState,
-                readConversations,
-              }),
-            );
-          } catch (error) {
-            console.warn('Failed to save read conversation to localStorage:', error);
-          }
-        } catch (error) {
-          console.error('❌ Erro ao marcar conversa como lida:', error);
-          // Não bloquear a seleção da conversa por erro de persistência
         }
+
+        void chatService
+          .markConversationAsRead(canonicalConversationId)
+          .then(() => {
+            useUnreadConversationsStore.getState().fetch();
+
+            try {
+              const saved = localStorage.getItem('crm-chat-state');
+              const currentState = saved ? JSON.parse(saved) : {};
+              const readConversations = currentState.readConversations || {};
+              readConversations[canonicalConversationId] = true;
+              localStorage.setItem(
+                'crm-chat-state',
+                JSON.stringify({
+                  ...currentState,
+                  readConversations,
+                }),
+              );
+            } catch (error) {
+              console.warn('Failed to save read conversation to localStorage:', error);
+            }
+          })
+          .catch(error => {
+            console.error('❌ Erro ao marcar conversa como lida:', error);
+          });
       }
 
       // Liberar lock após um delay mínimo

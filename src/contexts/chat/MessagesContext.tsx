@@ -424,6 +424,8 @@ const MessagesContext = createContext<MessagesContextValue | undefined>(undefine
 export function MessagesProvider({ children }: { children: React.ReactNode }) {
   const { t } = useLanguage('chat');
   const [state, dispatch] = useReducer(messagesReducer, initialState);
+  const messagesCacheRef = useRef(state.messages);
+  messagesCacheRef.current = state.messages;
 
   /**
    * TODO:
@@ -461,7 +463,12 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      dispatch({ type: 'SET_MESSAGES_LOADING', payload: { conversationId, loading: true } });
+      // Stale-while-revalidate: keep showing cached messages while refreshing.
+      // Only flip loading (skeleton) when this conversation has no cache yet.
+      const hasCachedMessages = (messagesCacheRef.current[conversationId]?.length ?? 0) > 0;
+      if (!hasCachedMessages) {
+        dispatch({ type: 'SET_MESSAGES_LOADING', payload: { conversationId, loading: true } });
+      }
 
       try {
         const response = await chatService.getMessages(conversationId);
@@ -491,20 +498,28 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : t('contexts.messages.errors.loadMessages');
-        dispatch({
-          type: 'SET_MESSAGES_ERROR',
-          payload: {
-            conversationId,
-            error: errorMessage,
-          },
-        });
-        toast.error(t('contexts.messages.errors.loadMessages'), {
-          description: errorMessage,
-          action: {
-            label: t('contexts.messages.tryAgain'),
-            onClick: () => loadMessages(conversationId),
-          },
-        });
+        // Keep cached messages visible on refresh failure; only surface error when empty
+        if (!hasCachedMessages) {
+          dispatch({
+            type: 'SET_MESSAGES_ERROR',
+            payload: {
+              conversationId,
+              error: errorMessage,
+            },
+          });
+          toast.error(t('contexts.messages.errors.loadMessages'), {
+            description: errorMessage,
+            action: {
+              label: t('contexts.messages.tryAgain'),
+              onClick: () => loadMessages(conversationId),
+            },
+          });
+        } else {
+          dispatch({
+            type: 'SET_MESSAGES_LOADING',
+            payload: { conversationId, loading: false },
+          });
+        }
       }
     },
     [state.messagesLoading, t],
